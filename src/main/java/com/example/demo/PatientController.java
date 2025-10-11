@@ -44,4 +44,5 @@ public class PatientController {
         System.out.println("Gender: " + gender);
         return FhirJSON;
     }
+
 }
