@@ -55,4 +55,9 @@ public class PatientController {
         return dataJSONParser.PatientData(FhirJson);
 
     }
+    @GetMapping("/FhirParser/Medication")
+    public String MedicationParser(@RequestBody String FhirJson){
+        return dataJSONParser.Medication(FhirJson);
+
+    }
 }
