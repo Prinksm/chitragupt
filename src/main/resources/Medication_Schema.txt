@@ -1,0 +1,123 @@
+//Codeable Concept
+CREATE TABLE code_system(
+system_id INT PRIMARY KEY,
+system_name VARCHAR(255) NOT NULL UNIQUE,
+version VARCHAR(50),
+)
+
+CREATE TABLE concepts(
+concept_id INT PRIMARY KEY,
+concept_name VARCHAR(255) NOT NULL,
+description VARCHAR(255) ,
+)
+CREATE TABLE concept_codings (
+    concept_id INT NOT NULL,
+    system_id INT NOT NULL,
+    code VARCHAR(255) NOT NULL,
+    display_text VARCHAR(255),
+    PRIMARY KEY (concept_id, system_id, code),
+    FOREIGN KEY (concept_id) REFERENCES concepts(concept_id),
+    FOREIGN KEY (system_id) REFERENCES code_system(system_id)
+);
+
+//Medication
+CREATE TABLE ingredients (
+    ingredient_id INT PRIMARY KEY,
+    concept_id INT NOT NULL,
+    FOREIGN KEY (concept_id) REFERENCES concepts(concept_id)
+);
+
+CREATE TABLE dose_forms (
+    dose_form_id INT PRIMARY KEY,
+    concept_id INT NOT NULL,
+    FOREIGN KEY (concept_id) REFERENCES concepts(concept_id)
+);
+
+CREATE TABLE strengths (
+    strength_id INT PRIMARY KEY,
+    value DECIMAL(10, 4) NOT NULL,
+    unit_id INT NOT NULL,
+    FOREIGN KEY (unit_id) REFERENCES concepts(concept_id)
+);
+
+CREATE TABLE medication_ingredients (
+    medication_id INT NOT NULL,
+    ingredient_id INT NOT NULL,
+    PRIMARY KEY (medication_id, ingredient_id),
+    FOREIGN KEY (medication_id) REFERENCES medications(medication_id),
+    FOREIGN KEY (ingredient_id) REFERENCES ingredients(ingredient_id)
+);
+
+CREATE TABLE medication_dose_forms (
+    medication_id INT NOT NULL,
+    dose_form_id INT NOT NULL,
+    PRIMARY KEY (medication_id, dose_form_id),
+    FOREIGN KEY (medication_id) REFERENCES medications(medication_id),
+    FOREIGN KEY (dose_form_id) REFERENCES dose_forms(dose_form_id)
+);
+
+CREATE TABLE medication_strengths (
+    medication_id INT NOT NULL,
+    strength_id INT NOT NULL,
+    PRIMARY KEY (medication_id, strength_id),
+    FOREIGN KEY (medication_id) REFERENCES medications(medication_id),
+    FOREIGN KEY (strength_id) REFERENCES strengths(strength_id)
+);
+CREATE TABLE medications (
+    medication_id INT PRIMARY KEY,
+    concept_id INT NOT NULL,
+    brand_name VARCHAR(255),
+    fhir_json JSONB,
+    FOREIGN KEY (concept_id) REFERENCES concepts(concept_id)
+);
+//Medication Statement
+
+CREATE TABLE medication_statements (
+    statement_id INT PRIMARY KEY,
+
+    medication_id INT NOT NULL,
+    prescription_id INT NOT NULL,
+    dosage_id INT,
+    status VARCHAR(50) NOT NULL,
+    effective_start_date DATETIME,
+    effective_end_date DATETIME,
+    notes VARCHAR(500)
+
+    FOREIGN KEY (medication_id) REFERENCES medications(medication_id),
+    FOREIGN KEY (dosage_id) REFERENCES dosages(dosage_id)
+    fhir_json JSONB;
+);
+
+CREATE TABLE dosages (
+    dosage_id INT PRIMARY KEY,
+    amount DECIMAL(10, 4),
+    amount_unit_id INT,
+    route_id INT,
+    instruction TEXT,
+    timing_id INT,
+    FOREIGN KEY (amount_unit_id) REFERENCES concepts(concept_id),
+    FOREIGN KEY (route_id) REFERENCES concepts(concept_id),
+    FOREIGN KEY (timing_id) REFERENCES timing(timing_id)
+);
+
+
+CREATE TABLE timing (
+    timing_id INT PRIMARY KEY,
+    frequency INT,
+    period DECIMAL(10, 4),
+    period_unit_id INT,
+    time_of_day TIME,
+    when_code_id INT,
+    FOREIGN KEY (period_unit_id) REFERENCES concepts(concept_id),
+    FOREIGN KEY (when_code_id) REFERENCES concepts(concept_id)
+);
+//Prescription
+CREATE TABLE prescription(
+ prescription_id INT PRIMARY KEY,
+ patient_id INT NOT NULL,
+ reason_id INT NOT NULL,
+ notes VARCHAR(500) ,
+ FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
+ FOREIGN KEY (reason_id) REFERENCES concepts(concept_id)
+);
+
