@@ -1,0 +1,163 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TYPE role_type AS ENUM (
+    'ADMIN',
+    'PATIENT'
+);
+
+
+CREATE TABLE user_roles(
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role role_type NOT NULL
+);
+
+CREATE TABLE otp(
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    otp VARCHAR(10) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+
+
+CREATE TABLE common_address (
+    id SERIAL PRIMARY KEY,
+    use_code VARCHAR(20),
+    address_type VARCHAR(50),
+    text VARCHAR(255),
+    line1 VARCHAR(100),
+    line2 VARCHAR(100),
+    city VARCHAR(50),
+    district VARCHAR(50),
+    state VARCHAR(50),
+    postal_code VARCHAR(20),
+    country VARCHAR(50),
+    period_start DATE,
+    period_end DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE common_telecom (
+    id SERIAL PRIMARY KEY,
+    system VARCHAR(20) NOT NULL,
+    value VARCHAR(100) NOT NULL,
+    use_code VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE patient (
+    id SERIAL PRIMARY KEY,
+    firstName VARCHAR(30) NOT NULL,
+    middleName VARCHAR(30),
+    lastName VARCHAR(30),
+    birth_date DATE,
+    gender VARCHAR(20),
+    maritalStatus VARCHAR(30),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fhir JSONB
+);
+
+
+CREATE TABLE patient_contact (
+    id SERIAL PRIMARY KEY,
+    patient_id INTEGER NOT NULL,
+    relationship_type VARCHAR(50),
+    firstName VARCHAR(30) NOT NULL,
+    middleName VARCHAR(30),
+    lastName VARCHAR(30),
+    period_start DATE,
+    period_end DATE,
+    FOREIGN KEY (patient_id) REFERENCES patient(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE patient_address (
+    id SERIAL PRIMARY KEY,
+    patient_id INTEGER NOT NULL,
+    address_id INTEGER NOT NULL,
+    FOREIGN KEY (patient_id) REFERENCES patient(id) ON DELETE CASCADE,
+    FOREIGN KEY (address_id) REFERENCES common_address(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE patient_telecom (
+    id SERIAL PRIMARY KEY,
+    patient_id INTEGER NOT NULL,
+    telecom_id INTEGER NOT NULL,
+    FOREIGN KEY (patient_id) REFERENCES patient(id) ON DELETE CASCADE,
+    FOREIGN KEY (telecom_id) REFERENCES common_telecom(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE contact_address (
+    id SERIAL PRIMARY KEY,
+    contact_id INTEGER NOT NULL,
+    address_id INTEGER NOT NULL,
+    FOREIGN KEY (contact_id) REFERENCES patient_contact(id) ON DELETE CASCADE,
+    FOREIGN KEY (address_id) REFERENCES common_address(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE contact_telecom (
+    id SERIAL PRIMARY KEY,
+    contact_id INTEGER NOT NULL,
+    telecom_id INTEGER NOT NULL,
+    FOREIGN KEY (contact_id) REFERENCES patient_contact(id) ON DELETE CASCADE,
+    FOREIGN KEY (telecom_id) REFERENCES common_telecom(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE patient_allergy (
+    id SERIAL PRIMARY KEY,
+    patient_id INTEGER NOT NULL REFERENCES patient(id) ON DELETE CASCADE,
+    clinical_status VARCHAR(20) NOT NULL,
+    verification_status VARCHAR(20),
+    allergy_type VARCHAR(20),
+    category VARCHAR(50),
+    criticality VARCHAR(50),
+    allergy_code INTEGER NOT NULL REFERENCES concept(id) ON DELETE CASCADE,
+    onset_date DATE,
+    recorded_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE clinic(
+    id SERIAL PRIMARY KEY,
+    clinicName VARCHAR(30) NOT NULL,
+    clinicEmail VARCHAR(30),
+    clinicAddress VARCHAR(100)
+);
+
+
+CREATE TABLE clinic_telecom (
+    id SERIAL PRIMARY KEY,
+    clinic_id INTEGER NOT NULL,
+    telecom_id INTEGER NOT NULL,
+    FOREIGN KEY (clinic_id) REFERENCES clinic(id) ON DELETE CASCADE,
+    FOREIGN KEY (telecom_id) REFERENCES common_telecom(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

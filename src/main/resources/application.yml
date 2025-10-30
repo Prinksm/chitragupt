@@ -1,0 +1,17 @@
+server:
+  port: 8089
+spring:
+  application:
+    name : phr
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/${DB_DATABASE}
+    username: ${DB_USER}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migrations
