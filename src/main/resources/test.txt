@@ -1,4 +1,4 @@
-CREATE TABLE test_category (
+CREATE TABLE IF NOT EXISTS  test_category (
     id SERIAL PRIMARY KEY,
     test_code INTEGER NOT NULL REFERENCES concept(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -6,7 +6,7 @@ CREATE TABLE test_category (
 );
 
 
-CREATE TABLE test_schedule (
+CREATE TABLE IF NOT EXISTS  test_schedule (
     id SERIAL PRIMARY KEY,
     test_category_id INTEGER NOT NULL REFERENCES test_category(id) ON DELETE CASCADE,
     clinic_id INTEGER REFERENCES clinic(id) ON DELETE SET NULL,
@@ -19,7 +19,7 @@ CREATE TABLE test_schedule (
 );
 
 
-CREATE TABLE test_result (
+CREATE TABLE IF NOT EXISTS  test_result (
     id SERIAL PRIMARY KEY,
     clinic_id INTEGER REFERENCES clinic(id) ON DELETE SET NULL,
     diagnostic_report_id INTEGER REFERENCES diagnostic_report(id) ON DELETE SET NULL,
@@ -30,7 +30,7 @@ CREATE TABLE test_result (
 );
 
 
-CREATE TABLE test_reminder (
+CREATE TABLE IF NOT EXISTS  test_reminder (
     id SERIAL PRIMARY KEY,
     test_schedule_id INTEGER NOT NULL REFERENCES test_schedule(id) ON DELETE CASCADE,
     sent_at TIMESTAMP,

@@ -1,5 +1,5 @@
 //Observations
-CREATE TABLE observations (
+CREATE TABLE IF NOT EXISTS  observations (
     observation_id INT PRIMARY KEY,
     patient_id INT NOT NULL,
     observation_concept_id INT NOT NULL,
@@ -15,14 +15,14 @@ CREATE TABLE observations (
     FOREIGN KEY (interpretation_id) REFERENCES concepts(concept_id),
     FOREIGN KEY (body_site_id) REFERENCES concepts(concept_id)
 );
-CREATE TABLE observation_categories (
+CREATE TABLE IF NOT EXISTS  observation_categories_mapping (
     observation_id INT NOT NULL,
     category_concept_id INT NOT NULL,
     PRIMARY KEY (observation_id, category_concept_id),
     FOREIGN KEY (observation_id) REFERENCES observations(observation_id),
     FOREIGN KEY (category_concept_id) REFERENCES concepts(concept_id)
 );
-CREATE TABLE observation_results (
+CREATE TABLE IF NOT EXISTS  observation_results (
     result_id INT PRIMARY KEY,
     observation_id INT NOT NULL,
     value_type VARCHAR(50) NOT NULL,
@@ -35,17 +35,17 @@ CREATE TABLE observation_results (
     FOREIGN KEY (value_quantity_unit_id) REFERENCES concepts(concept_id),
     FOREIGN KEY (value_concept_id) REFERENCES concepts(concept_id)
 );
-CREATE TABLE observation_components (
+CREATE TABLE IF NOT EXISTS  observation_components (
     component_id INT PRIMARY KEY,
     observation_id INT NOT NULL,
     concept_id INT NOT NULL,
     value_quantity_value DECIMAL(18, 4),
-    value_quantity_unit_id INT, -- FK to concepts for the unit ('mmHg')
+    value_quantity_unit_id INT,
     FOREIGN KEY (observation_id) REFERENCES observations(observation_id),
     FOREIGN KEY (concept_id) REFERENCES concepts(concept_id),
     FOREIGN KEY (value_quantity_unit_id) REFERENCES concepts(concept_id)
 );
-CREATE TABLE diagnostic_reports (
+CREATE TABLE IF NOT EXISTS  diagnostic_reports (
     report_id INT PRIMARY KEY,
     patient_id INT NOT NULL,
     report_type_concept_id INT NOT NULL,
@@ -56,14 +56,14 @@ CREATE TABLE diagnostic_reports (
     FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
     FOREIGN KEY (report_type_concept_id) REFERENCES concepts(concept_id)
 );
-CREATE TABLE report_observations (
+CREATE TABLE IF NOT EXISTS  report_observations (
     report_id INT NOT NULL,
     observation_id INT NOT NULL,
     PRIMARY KEY (report_id, observation_id),
     FOREIGN KEY (report_id) REFERENCES diagnostic_reports(report_id),
     FOREIGN KEY (observation_id) REFERENCES observations(observation_id)
 );
-CREATE TABLE reference_ranges (
+CREATE TABLE IF NOT EXISTS  reference_ranges (
     reference_range_id INT PRIMARY KEY,
     low_value DECIMAL(18, 4),
     high_value DECIMAL(18, 4),
@@ -78,7 +78,7 @@ CREATE TABLE reference_ranges (
     FOREIGN KEY (type_concept_id) REFERENCES concepts(concept_id),
     FOREIGN KEY (meaning_concept_id) REFERENCES concepts(concept_id)
 );
-CREATE TABLE observation_concept_reference_ranges (
+CREATE TABLE IF NOT EXISTS  observation_concept_reference_ranges (
     observation_concept_id INT NOT NULL,
     reference_range_id INT NOT NULL,
     PRIMARY KEY (observation_concept_id, reference_range_id),
