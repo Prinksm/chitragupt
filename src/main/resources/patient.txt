@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS  users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(50) NOT NULL,
@@ -13,12 +13,12 @@ CREATE TYPE role_type AS ENUM (
 );
 
 
-CREATE TABLE user_roles(
+CREATE TABLE IF NOT EXISTS  user_roles(
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     role role_type NOT NULL
 );
 
-CREATE TABLE otp(
+CREATE TABLE IF NOT EXISTS  otp(
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     otp VARCHAR(10) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE otp(
 )
 
 
-CREATE TABLE common_address (
+CREATE TABLE IF NOT EXISTS  common_address (
     id SERIAL PRIMARY KEY,
     use_code VARCHAR(20),
     address_type VARCHAR(50),
@@ -46,7 +46,7 @@ CREATE TABLE common_address (
 );
 
 
-CREATE TABLE common_telecom (
+CREATE TABLE IF NOT EXISTS  common_telecom (
     id SERIAL PRIMARY KEY,
     system VARCHAR(20) NOT NULL,
     value VARCHAR(100) NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE common_telecom (
 );
 
 
-CREATE TABLE patient (
+CREATE TABLE IF NOT EXISTS  patient (
     id SERIAL PRIMARY KEY,
     firstName VARCHAR(30) NOT NULL,
     middleName VARCHAR(30),
@@ -71,7 +71,7 @@ CREATE TABLE patient (
 );
 
 
-CREATE TABLE patient_contact (
+CREATE TABLE IF NOT EXISTS  patient_contact (
     id SERIAL PRIMARY KEY,
     patient_id INTEGER NOT NULL,
     relationship_type VARCHAR(50),
@@ -86,7 +86,7 @@ CREATE TABLE patient_contact (
 );
 
 
-CREATE TABLE patient_address (
+CREATE TABLE IF NOT EXISTS  patient_address (
     id SERIAL PRIMARY KEY,
     patient_id INTEGER NOT NULL,
     address_id INTEGER NOT NULL,
@@ -97,7 +97,7 @@ CREATE TABLE patient_address (
 );
 
 
-CREATE TABLE patient_telecom (
+CREATE TABLE IF NOT EXISTS  patient_telecom (
     id SERIAL PRIMARY KEY,
     patient_id INTEGER NOT NULL,
     telecom_id INTEGER NOT NULL,
@@ -108,7 +108,7 @@ CREATE TABLE patient_telecom (
 );
 
 
-CREATE TABLE contact_address (
+CREATE TABLE IF NOT EXISTS  contact_address (
     id SERIAL PRIMARY KEY,
     contact_id INTEGER NOT NULL,
     address_id INTEGER NOT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE contact_address (
 );
 
 
-CREATE TABLE contact_telecom (
+CREATE TABLE IF NOT EXISTS  contact_telecom (
     id SERIAL PRIMARY KEY,
     contact_id INTEGER NOT NULL,
     telecom_id INTEGER NOT NULL,
@@ -130,7 +130,7 @@ CREATE TABLE contact_telecom (
 );
 
 
-CREATE TABLE patient_allergy (
+CREATE TABLE IF NOT EXISTS  patient_allergy (
     id SERIAL PRIMARY KEY,
     patient_id INTEGER NOT NULL REFERENCES patient(id) ON DELETE CASCADE,
     clinical_status VARCHAR(20) NOT NULL,
@@ -144,7 +144,7 @@ CREATE TABLE patient_allergy (
 );
 
 
-CREATE TABLE clinic(
+CREATE TABLE IF NOT EXISTS  clinic(
     id SERIAL PRIMARY KEY,
     clinicName VARCHAR(30) NOT NULL,
     clinicEmail VARCHAR(30),
@@ -152,7 +152,7 @@ CREATE TABLE clinic(
 );
 
 
-CREATE TABLE clinic_telecom (
+CREATE TABLE IF NOT EXISTS  clinic_telecom (
     id SERIAL PRIMARY KEY,
     clinic_id INTEGER NOT NULL,
     telecom_id INTEGER NOT NULL,

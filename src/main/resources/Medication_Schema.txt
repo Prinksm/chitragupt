@@ -1,46 +1,48 @@
 //Codeable Concept
-CREATE TABLE code_system(
+CREATE TABLE IF NOT EXISTS  code_system (
 system_id INT PRIMARY KEY,
 system_name VARCHAR(255) NOT NULL UNIQUE,
 version VARCHAR(50),
 )
 
-CREATE TABLE concepts(
+CREATE TABLE IF NOT EXISTS concepts(
 concept_id INT PRIMARY KEY,
 concept_name VARCHAR(255) NOT NULL,
 description VARCHAR(255) ,
+type VARCHAR(255) NOT NULL,
 )
-CREATE TABLE concept_codings (
+CREATE TABLE IF NOT EXISTS  concept_codings_mapping (
     concept_id INT NOT NULL,
     system_id INT NOT NULL,
     code VARCHAR(255) NOT NULL,
     display_text VARCHAR(255),
+
     PRIMARY KEY (concept_id, system_id, code),
     FOREIGN KEY (concept_id) REFERENCES concepts(concept_id),
     FOREIGN KEY (system_id) REFERENCES code_system(system_id)
 );
 
 //Medication
-CREATE TABLE ingredients (
+CREATE TABLE IF NOT EXISTS  ingredients (
     ingredient_id INT PRIMARY KEY,
     concept_id INT NOT NULL,
     FOREIGN KEY (concept_id) REFERENCES concepts(concept_id)
 );
 
-CREATE TABLE dose_forms (
+CREATE TABLE IF NOT EXISTS dose_forms (
     dose_form_id INT PRIMARY KEY,
     concept_id INT NOT NULL,
     FOREIGN KEY (concept_id) REFERENCES concepts(concept_id)
 );
 
-CREATE TABLE strengths (
+CREATE TABLE IF NOT EXISTS strengths (
     strength_id INT PRIMARY KEY,
     value DECIMAL(10, 4) NOT NULL,
     unit_id INT NOT NULL,
     FOREIGN KEY (unit_id) REFERENCES concepts(concept_id)
 );
 
-CREATE TABLE medication_ingredients (
+CREATE TABLE IF NOT EXISTS  medication_ingredients_mapping (
     medication_id INT NOT NULL,
     ingredient_id INT NOT NULL,
     PRIMARY KEY (medication_id, ingredient_id),
@@ -48,7 +50,7 @@ CREATE TABLE medication_ingredients (
     FOREIGN KEY (ingredient_id) REFERENCES ingredients(ingredient_id)
 );
 
-CREATE TABLE medication_dose_forms (
+CREATE TABLE IF NOT EXISTS  medication_dose_forms_mapping (
     medication_id INT NOT NULL,
     dose_form_id INT NOT NULL,
     PRIMARY KEY (medication_id, dose_form_id),
@@ -56,23 +58,31 @@ CREATE TABLE medication_dose_forms (
     FOREIGN KEY (dose_form_id) REFERENCES dose_forms(dose_form_id)
 );
 
-CREATE TABLE medication_strengths (
+CREATE TABLE IF NOT EXISTS  medication_strengths_mapping (
     medication_id INT NOT NULL,
     strength_id INT NOT NULL,
     PRIMARY KEY (medication_id, strength_id),
     FOREIGN KEY (medication_id) REFERENCES medications(medication_id),
     FOREIGN KEY (strength_id) REFERENCES strengths(strength_id)
 );
-CREATE TABLE medications (
+CREATE TABLE IF NOT EXISTS  medications (
     medication_id INT PRIMARY KEY,
     concept_id INT NOT NULL,
-    brand_name VARCHAR(255),
+    generic_name VARCHAR(255),
     fhir_json JSONB,
     FOREIGN KEY (concept_id) REFERENCES concepts(concept_id)
 );
-//Medication Statement
 
-CREATE TABLE medication_statements (
+CREATE TABLE IF NOT EXISTS brand_name_medicines(
+medicine_id INT PRIMARY KEY,
+brand_name VARCHAR NOT  NULL,
+manufacturer_name VARCHAR NOT NULL
+type VARCHAR NOT NULL,
+generic_name VARCHAR NOT NULL,
+pack_size_label
+)
+//Medication Statement
+CREATE TABLE IF NOT EXISTS  medication_statements (
     statement_id INT PRIMARY KEY,
 
     medication_id INT NOT NULL,
@@ -88,7 +98,7 @@ CREATE TABLE medication_statements (
     fhir_json JSONB;
 );
 
-CREATE TABLE dosages (
+CREATE TABLE IF NOT EXISTS  dosages (
     dosage_id INT PRIMARY KEY,
     amount DECIMAL(10, 4),
     amount_unit_id INT,
@@ -101,7 +111,7 @@ CREATE TABLE dosages (
 );
 
 
-CREATE TABLE timing (
+CREATE TABLE IF NOT EXISTS  timing (
     timing_id INT PRIMARY KEY,
     frequency INT,
     period DECIMAL(10, 4),
@@ -112,7 +122,7 @@ CREATE TABLE timing (
     FOREIGN KEY (when_code_id) REFERENCES concepts(concept_id)
 );
 //Prescription
-CREATE TABLE prescription(
+CREATE TABLE IF NOT EXISTS  prescription(
  prescription_id INT PRIMARY KEY,
  patient_id INT NOT NULL,
  reason_id INT NOT NULL,
