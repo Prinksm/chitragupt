@@ -1,64 +1,5 @@
-CREATE SEQUENCE IF NOT EXISTS users_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS users.users (
-    id BIGINT PRIMARY KEY DEFAULT nextval('users_id_seq'),
-    email VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-
-CREATE TYPE users.role_type AS ENUM (
-    'ADMIN',
-    'PATIENT'
-);
-
-
-CREATE TABLE IF NOT EXISTS  users.user_roles(
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    role role_type NOT NULL
-);
-
-CREATE SEQUENCE IF NOT EXISTS otp_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  users.otp(
-    id BIGINT PRIMARY KEY DEFAULT nextval('otp_id_seq'),
-    user_id INTEGER NOT NULL,
-    otp VARCHAR(10) NOT NULL,
-    expires_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
-
-CREATE SEQUENCE IF NOT EXISTS common_address_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  users.common_address (
-    id BIGINT PRIMARY KEY DEFAULT nextval('common_address_id_seq'),
-    use_code VARCHAR(20),
-    address_type VARCHAR(50),
-    text VARCHAR(255),
-    line1 VARCHAR(100),
-    line2 VARCHAR(100),
-    city VARCHAR(50),
-    district VARCHAR(50),
-    state VARCHAR(50),
-    postal_code VARCHAR(20),
-    country VARCHAR(50),
-    period_start DATE,
-    period_end DATE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE SEQUENCE IF NOT EXISTS common_telecom_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  users.common_telecom (
-    id BIGINT PRIMARY KEY DEFAULT nextval('common_telecom_id_seq'),
-    system VARCHAR(20) NOT NULL,
-    value VARCHAR(100) NOT NULL,
-    use_code VARCHAR(20),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE SEQUENCE IF NOT EXISTS patient_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  patient.patient (
+CREATE TABLE IF NOT EXISTS patient.patient (
     id BIGINT PRIMARY KEY DEFAULT nextval('patient_id_seq'),
     firstName VARCHAR(30) NOT NULL,
     middleName VARCHAR(30),
@@ -74,9 +15,9 @@ CREATE TABLE IF NOT EXISTS  patient.patient (
 
 
 CREATE SEQUENCE IF NOT EXISTS patient_contact_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  patient.patient_contact (
+CREATE TABLE IF NOT EXISTS patient.patient_contact (
     id BIGINT PRIMARY KEY DEFAULT nextval('patient_contact_id_seq'),
-    patient_id INTEGER NOT NULL,
+    patient_id BIGINT NOT NULL,
     relationship_type VARCHAR(50),
     firstName VARCHAR(30) NOT NULL,
     middleName VARCHAR(30),
@@ -90,10 +31,10 @@ CREATE TABLE IF NOT EXISTS  patient.patient_contact (
 
 
 CREATE SEQUENCE IF NOT EXISTS patient_address_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  patient.patient_address (
+CREATE TABLE IF NOT EXISTS patient.patient_address (
     id BIGINT PRIMARY KEY DEFAULT nextval('patient_address_id_seq'),
-    patient_id INTEGER NOT NULL,
-    address_id INTEGER NOT NULL,
+    patient_id BIGINT NOT NULL,
+    address_id BIGINT NOT NULL,
     FOREIGN KEY (patient_id) REFERENCES patient.patient(id) ON DELETE CASCADE,
     FOREIGN KEY (address_id) REFERENCES users.common_address(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -102,10 +43,10 @@ CREATE TABLE IF NOT EXISTS  patient.patient_address (
 
 
 CREATE SEQUENCE IF NOT EXISTS patient_telecom_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  patient.patient_telecom (
+CREATE TABLE IF NOT EXISTS patient.patient_telecom (
     id BIGINT PRIMARY KEY DEFAULT nextval('patient_telecom_id_seq'),
-    patient_id INTEGER NOT NULL,
-    telecom_id INTEGER NOT NULL,
+    patient_id BIGINT NOT NULL,
+    telecom_id BIGINT NOT NULL,
     FOREIGN KEY (patient_id) REFERENCES patient.patient(id) ON DELETE CASCADE,
     FOREIGN KEY (telecom_id) REFERENCES users.common_telecom(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -114,10 +55,10 @@ CREATE TABLE IF NOT EXISTS  patient.patient_telecom (
 
 
 CREATE SEQUENCE IF NOT EXISTS contact_address_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  patient.contact_address (
+CREATE TABLE IF NOT EXISTS patient.contact_address (
     id BIGINT PRIMARY KEY DEFAULT nextval('contact_address_id_seq'),
-    contact_id INTEGER NOT NULL,
-    address_id INTEGER NOT NULL,
+    contact_id BIGINT NOT NULL,
+    address_id BIGINT NOT NULL,
     FOREIGN KEY (contact_id) REFERENCES patient.patient_contact(id) ON DELETE CASCADE,
     FOREIGN KEY (address_id) REFERENCES users.common_address(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -126,10 +67,10 @@ CREATE TABLE IF NOT EXISTS  patient.contact_address (
 
 
 CREATE SEQUENCE IF NOT EXISTS contact_telecom_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  patient.contact_telecom (
+CREATE TABLE IF NOT EXISTS patient.contact_telecom (
     id BIGINT PRIMARY KEY DEFAULT nextval('contact_telecom_id_seq'),
-    contact_id INTEGER NOT NULL,
-    telecom_id INTEGER NOT NULL,
+    contact_id BIGINT NOT NULL,
+    telecom_id BIGINT NOT NULL,
     FOREIGN KEY (contact_id) REFERENCES patient.patient_contact(id) ON DELETE CASCADE,
     FOREIGN KEY (telecom_id) REFERENCES users.common_telecom(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -138,22 +79,22 @@ CREATE TABLE IF NOT EXISTS  patient.contact_telecom (
 
 
 CREATE SEQUENCE IF NOT EXISTS patient_allergy_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  patient.patient_allergy (
+CREATE TABLE IF NOT EXISTS patient.patient_allergy (
     id BIGINT PRIMARY KEY DEFAULT nextval('patient_allergy_id_seq'),
-    patient_id INTEGER NOT NULL REFERENCES patient.patient(id) ON DELETE CASCADE,
+    patient_id BIGINT NOT NULL REFERENCES patient.patient(id) ON DELETE CASCADE,
     clinical_status VARCHAR(20) NOT NULL,
     verification_status VARCHAR(20),
     allergy_type VARCHAR(20),
     category VARCHAR(50),
     criticality VARCHAR(50),
-    allergy_code INTEGER NOT NULL REFERENCES codeable_concept.concept(id) ON DELETE CASCADE,
+    allergy_code BIGINT NOT NULL REFERENCES codeable_concept.concepts(concept_id) ON DELETE CASCADE,
     onset_date DATE,
     recorded_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
 CREATE SEQUENCE IF NOT EXISTS clinic_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  patient.clinic(
+CREATE TABLE IF NOT EXISTS patient.clinic (
     id BIGINT PRIMARY KEY DEFAULT nextval('clinic_id_seq'),
     clinicName VARCHAR(30) NOT NULL,
     clinicEmail VARCHAR(30),
@@ -162,10 +103,10 @@ CREATE TABLE IF NOT EXISTS  patient.clinic(
 
 
 CREATE SEQUENCE IF NOT EXISTS clinic_telecom_id_seq START WITH 1;
-CREATE TABLE IF NOT EXISTS  patient.clinic_telecom (
+CREATE TABLE IF NOT EXISTS patient.clinic_telecom (
     id BIGINT PRIMARY KEY DEFAULT nextval('clinic_telecom_id_seq'),
-    clinic_id INTEGER NOT NULL,
-    telecom_id INTEGER NOT NULL,
+    clinic_id BIGINT NOT NULL,
+    telecom_id BIGINT NOT NULL,
     FOREIGN KEY (clinic_id) REFERENCES patient.clinic(id) ON DELETE CASCADE,
     FOREIGN KEY (telecom_id) REFERENCES users.common_telecom(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

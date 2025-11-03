@@ -1,6 +1,7 @@
 //Observations
-CREATE TABLE IF NOT EXISTS  observations (
-    observation_id INT PRIMARY KEY,
+CREATE SEQUENCE IF NOT EXISTS observations_id_seq START WITH 1;
+CREATE TABLE IF NOT EXISTS  diagnosis.observations (
+    observation_id BIGINT PRIMARY KEY DEFAULT nextval('observations_id_seq'),
     patient_id INT NOT NULL,
     observation_concept_id INT NOT NULL,
     effective_date DATETIME,
@@ -10,18 +11,21 @@ CREATE TABLE IF NOT EXISTS  observations (
     performer_id INT,
     notes TEXT,
     fhir_json JSONB,
-    FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
-    FOREIGN KEY (observation_concept_id) REFERENCES concepts(concept_id),
-    FOREIGN KEY (interpretation_id) REFERENCES concepts(concept_id),
-    FOREIGN KEY (body_site_id) REFERENCES concepts(concept_id)
+    FOREIGN KEY (patient_id) REFERENCES patient.patients(patient_id),
+    FOREIGN KEY (observation_concept_id) REFERENCES codeable_concept.concepts(concept_id),
+    FOREIGN KEY (interpretation_id) REFERENCES codeable_concept.concepts(concept_id),
+    FOREIGN KEY (body_site_id) REFERENCES codeable_concept.concepts(concept_id)
 );
-CREATE TABLE IF NOT EXISTS  observation_categories_mapping (
+
+
+CREATE TABLE IF NOT EXISTS  diagnosis.observation_categories_mapping (
     observation_id INT NOT NULL,
     category_concept_id INT NOT NULL,
     PRIMARY KEY (observation_id, category_concept_id),
-    FOREIGN KEY (observation_id) REFERENCES observations(observation_id),
-    FOREIGN KEY (category_concept_id) REFERENCES concepts(concept_id)
+    FOREIGN KEY (observation_id) REFERENCES diagnosis.observations(observation_id),
+    FOREIGN KEY (category_concept_id) REFERENCES codeable_concept.concepts(concept_id)
 );
+
 CREATE TABLE IF NOT EXISTS  observation_results (
     result_id INT PRIMARY KEY,
     observation_id INT NOT NULL,
