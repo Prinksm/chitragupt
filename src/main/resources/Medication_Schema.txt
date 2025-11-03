@@ -45,9 +45,11 @@ CREATE TABLE IF NOT EXISTS strengths (
 CREATE TABLE IF NOT EXISTS  medication_ingredients_mapping (
     medication_id INT NOT NULL,
     ingredient_id INT NOT NULL,
+    strength_id INT NOT NULL,
     PRIMARY KEY (medication_id, ingredient_id),
     FOREIGN KEY (medication_id) REFERENCES medications(medication_id),
-    FOREIGN KEY (ingredient_id) REFERENCES ingredients(ingredient_id)
+    FOREIGN KEY (ingredient_id) REFERENCES ingredients(ingredient_id),
+    FOREIGN KEY (strength_id) REFERENCES strengths(strength_id)
 );
 
 CREATE TABLE IF NOT EXISTS  medication_dose_forms_mapping (
@@ -58,15 +60,12 @@ CREATE TABLE IF NOT EXISTS  medication_dose_forms_mapping (
     FOREIGN KEY (dose_form_id) REFERENCES dose_forms(dose_form_id)
 );
 
-CREATE TABLE IF NOT EXISTS  medication_strengths_mapping (
-    medication_id INT NOT NULL,
-    strength_id INT NOT NULL,
-    PRIMARY KEY (medication_id, strength_id),
-    FOREIGN KEY (medication_id) REFERENCES medications(medication_id),
-    FOREIGN KEY (strength_id) REFERENCES strengths(strength_id)
-);
 CREATE TABLE IF NOT EXISTS  medications (
     medication_id INT PRIMARY KEY,
+    brand_name VARCHAR NOT  NULL,
+    manufacturer_name VARCHAR NOT NULL,
+    pack_size_label,
+    type VARCHAR NOT NULL,
     concept_id INT NOT NULL,
     generic_name VARCHAR(255),
     fhir_json JSONB,
@@ -75,11 +74,10 @@ CREATE TABLE IF NOT EXISTS  medications (
 
 CREATE TABLE IF NOT EXISTS brand_name_medicines(
 medicine_id INT PRIMARY KEY,
-brand_name VARCHAR NOT  NULL,
-manufacturer_name VARCHAR NOT NULL
-type VARCHAR NOT NULL,
+
+
 generic_name VARCHAR NOT NULL,
-pack_size_label
+
 )
 //Medication Statement
 CREATE TABLE IF NOT EXISTS  medication_statements (
