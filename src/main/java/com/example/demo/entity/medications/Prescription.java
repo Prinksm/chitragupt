@@ -1,0 +1,35 @@
+package com.example.demo.entity.medications;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "prescription", schema = "medication")
+public class Prescription {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "prescription_generator")
+    @SequenceGenerator(
+            name = "prescription_generator",
+            sequenceName = "medication.prescription_id_seq",
+            schema = "medication",
+            allocationSize = 1
+    )
+    @Column(name = "prescription_id")
+    private Long prescriptionId;
+    @Column(name = "patient_id",nullable = false)
+    private Long patientId;
+    @Column(name = "reason_id",nullable = false)
+    private Long reasonId ;
+
+    @Column(name = "notes")
+    private String  notes;
+
+}
