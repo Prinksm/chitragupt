@@ -1,4 +1,4 @@
-CREATE SCHEMA IF NOT EXISTS medication;
+
 CREATE SEQUENCE IF NOT EXISTS medication.ingredients_id_seq START WITH 1;
 CREATE TABLE IF NOT EXISTS medication.ingredients (
     ingredient_id BIGINT PRIMARY KEY DEFAULT nextval('medication.ingredients_id_seq'),
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS medication.dosages (
 CREATE SEQUENCE IF NOT EXISTS medication.medication_statements_id_seq START WITH 1;
 CREATE TABLE IF NOT EXISTS medication.medication_statements (
     statement_id BIGINT PRIMARY KEY DEFAULT nextval('medication.medication_statements_id_seq'),
-    medication_id BIGINT NOT NULL,    -- Changed to BIGINT to match parent table type
+    medication_id BIGINT NOT NULL,
     prescription_id BIGINT NOT NULL,  -- Changed to BIGINT to match parent table type
     dosage_id BIGINT,                 -- Changed to BIGINT to match parent table type
     status VARCHAR(50) NOT NULL,
