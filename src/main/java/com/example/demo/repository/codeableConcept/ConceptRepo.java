@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface ConceptRepo extends JpaRepository<Concepts,Long> {
+    Optional<Concepts>  findByConceptNameAndType(String display, String type);
 }

@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 @Getter
@@ -37,6 +39,7 @@ public class Medications{
     private Long conceptId;
     @Column(name = "generic_name", length = 255)
     private String genericName;
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "fhir_json", columnDefinition = "JSONB")
     private String fhirJson;
 }
