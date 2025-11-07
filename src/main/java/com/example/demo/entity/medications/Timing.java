@@ -22,8 +22,8 @@ public class Timing {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "timing_generator")
     @SequenceGenerator(
             name = "timing_generator",
-            sequenceName = "medication.timing_id_seq",
-            schema = "medication",
+            sequenceName = "timing_id_seq",
+            schema = "public",
             allocationSize = 1
     )
     @Column(name = "timing_id")

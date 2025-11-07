@@ -18,8 +18,8 @@ public class Prescription {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "prescription_generator")
     @SequenceGenerator(
             name = "prescription_generator",
-            sequenceName = "medication.prescription_id_seq",
-            schema = "medication",
+            sequenceName = "prescription_id_seq",
+            schema = "public",
             allocationSize = 1
     )
     @Column(name = "prescription_id")

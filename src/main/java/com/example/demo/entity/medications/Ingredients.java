@@ -20,8 +20,8 @@ public class Ingredients {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ingredients_generator")
     @SequenceGenerator(
             name = "ingredients_generator",
-            sequenceName = "medication.ingredients_id_seq",
-            schema = "medication",
+            sequenceName = "ingredients_id_seq",
+            schema = "public",
             allocationSize = 1
     )
     @Column(name = "ingredient_id")

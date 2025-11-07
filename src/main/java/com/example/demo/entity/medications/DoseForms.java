@@ -21,7 +21,7 @@ public class DoseForms {
     @SequenceGenerator(
             name = "dose_forms_generator",
             sequenceName = "dose_forms_id_seq",
-            schema = "medication",
+            schema = "public",
             allocationSize = 1
     )
     @Column(name = "dose_form_id")

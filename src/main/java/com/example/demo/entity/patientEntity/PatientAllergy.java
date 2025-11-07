@@ -1,5 +1,6 @@
 package com.example.demo.entity.patientEntity;
 
+import com.example.demo.entity.codeableConcept.Concepts;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 public class PatientAllergy {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patient_allergy_id_seq")
-    @SequenceGenerator(name = "patient_allergy_id_seq", sequenceName = "patient.patient_allergy_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "patient_allergy_id_seq", sequenceName = "patient_allergy_id_seq", allocationSize = 1)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,9 +37,8 @@ public class PatientAllergy {
     @Column(length = 50)
     private String criticality;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "allergy_code", nullable = false)
-    private Concept allergyCode;
+    @Column(name = "allergy_code", nullable = false)
+    private Long allergyCode;
 
     @Column(name = "onset_date")
     private LocalDate onsetDate;

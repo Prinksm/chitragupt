@@ -97,13 +97,31 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.2.1</version> <executions>
+				<execution>
+					<phase>initialize</phase>
+					<goals>
+						<goal>read-project-properties</goal>
+					</goals>
+					<configuration>
+						<files>
+							<file>${project.basedir}/env.properties</file>
+						</files>
+						<useDefaultValues>true</useDefaultValues>
+					</configuration>
+				</execution>
+			</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-maven-plugin</artifactId>
 				<version>11.7.2</version>
 				<configuration>
-					<url>jdbc:postgresql://localhost:5432/chitragupt</url>
-					<user>postgres</user>
-					<password>argusadmin</password>
+					<url>url</url>
+					<user>name</user>
+					<password>pass</password>
 					<locations>filesystem:src/main/resources/db/migrations</locations>
 				</configuration>
 			</plugin>

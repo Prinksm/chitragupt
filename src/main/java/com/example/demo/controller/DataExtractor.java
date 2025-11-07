@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.services.DataImports.AllergyCodesExcelImportService;
 import com.example.demo.services.DataImports.DoseFormExcelImportService;
 import com.example.demo.services.DataImports.MedicineExcelImportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ public class DataExtractor {
     DoseFormExcelImportService doseFormExcelImportService;
     @Autowired
     MedicineExcelImportService medicineExcelImportService;
+    @Autowired
+    AllergyCodesExcelImportService allergyCodesExcelImportService;
 
         @PostMapping("/upload")
         public ResponseEntity<String> uploadDoseFormExcel(@RequestParam("file") MultipartFile file) {
@@ -43,6 +46,17 @@ public class DataExtractor {
         try {
            medicineExcelImportService.importMedicineExcel(file);
             return ResponseEntity.ok("DoseForm Excel imported successfully!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(":x: Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/upload-allergyCodes")
+    public ResponseEntity<String> uploadAllergyCodesExcel(@RequestParam("file") MultipartFile file) {
+        try {
+            allergyCodesExcelImportService.importAllergyCodesExcel(file);
+            return ResponseEntity.ok("Allergy Codes Excel imported successfully!");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(":x: Error: " + e.getMessage());

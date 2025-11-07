@@ -80,13 +80,13 @@ public class DoseFormExcelImportService {
                 Cell cell = row.getCell(0);
                 String code;
                 if (cell != null) {
-                    // The formatCellValue() method returns the cell's value as a string.
+
                     code = formatter.formatCellValue(cell).trim();
                 } else {
-                    // Handle the case where the cell is null
+
                     code = "";
                 }
-//                String codes = row.getCell(1).getStringCellValue().trim();
+
                 String systemUrl = row.getCell(1).getStringCellValue().trim();
                 String display = row.getCell(2).getStringCellValue().trim();
                 System.out.println(systemUrl);

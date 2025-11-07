@@ -22,7 +22,7 @@ public class Medications{
     @SequenceGenerator(
             name = "medications_generator",
             sequenceName = "medications_id_seq",
-            schema = "medication",
+            schema = "public",
             allocationSize = 1
     )
     @Column(name = "medication_id")

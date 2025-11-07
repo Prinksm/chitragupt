@@ -22,7 +22,7 @@ public class Strengths {
     @SequenceGenerator(
             name = "strengths_generator",
             sequenceName = "strengths_id_seq",
-            schema = "medication",
+            schema = "public",
             allocationSize = 1
     )
     @Column(name = "strength_id")
