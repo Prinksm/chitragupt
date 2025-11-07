@@ -8,15 +8,16 @@ CREATE TABLE IF NOT EXISTS users.users (
 );
 
 
-CREATE TYPE users.role_type AS ENUM (
-    'ADMIN',
-    'PATIENT'
+CREATE TABLE IF NOT EXISTS users.roles (
+   id SERIAL PRIMARY KEY,
+   name VARCHAR(50) UNIQUE NOT NULL
 );
 
 
 CREATE TABLE IF NOT EXISTS users.user_roles (
-    user_id BIGINT NOT NULL REFERENCES users.users(id) ON DELETE CASCADE,
-    role users.role_type NOT NULL
+     user_id BIGINT NOT NULL REFERENCES users.users(id) ON DELETE CASCADE,
+     role_id BIGINT NOT NULL REFERENCES users.roles(id) ON DELETE CASCADE,
+     PRIMARY KEY (user_id, role_id)
 );
 
 

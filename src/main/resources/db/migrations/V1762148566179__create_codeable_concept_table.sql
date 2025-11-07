@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS codeable_concept.concepts (
 
 
 CREATE TABLE IF NOT EXISTS codeable_concept.concept_codings_mapping (
-    concept_id INT NOT NULL,
-    system_id INT NOT NULL,
+    concept_id BIGINT NOT NULL,
+    system_id BIGINT NOT NULL,
     code VARCHAR(255) NOT NULL PRIMARY KEY,
     display_text VARCHAR(255),
     FOREIGN KEY (concept_id) REFERENCES codeable_concept.concepts(concept_id),
