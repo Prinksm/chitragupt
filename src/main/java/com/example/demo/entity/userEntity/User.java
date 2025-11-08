@@ -2,7 +2,13 @@ package com.example.demo.entity.userEntity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -10,7 +16,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_seq")
     @SequenceGenerator(name = "users_id_seq", sequenceName = "users_id_seq", allocationSize = 1)
@@ -21,6 +27,21 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(name = "first_name", nullable = false, length = 30)
+    private String firstName;
+
+    @Column(name = "middle_name", length = 30)
+    private String middleName;
+
+    @Column(name = "last_name", length = 30)
+    private String lastName;
+
+    @Column(name = "contact_number", length = 15)
+    private String contactNumber;
+
+    @Transient
+    private String confirmPassword;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -47,5 +68,15 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 }

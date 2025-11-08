@@ -19,13 +19,16 @@ public class Patient {
     @SequenceGenerator(name = "patient_id_seq", sequenceName = "patient_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "firstName", nullable = false, length = 30)
+    @Column(name = "user_id", nullable = false, unique = true)
+    private long userId;
+
+    @Column(name = "firstname", nullable = false, length = 30)
     private String firstName;
 
-    @Column(name = "middleName", length = 30)
+    @Column(name = "middlename", length = 30)
     private String middleName;
 
-    @Column(name = "lastName", length = 30)
+    @Column(name = "lastname", length = 30)
     private String lastName;
 
     @Column(name = "birth_date")
@@ -34,7 +37,7 @@ public class Patient {
     @Column(length = 20)
     private String gender;
 
-    @Column(name = "maritalStatus", length = 30)
+    @Column(name = "maritalstatus", length = 30)
     private String maritalStatus;
 
     @Column(name = "is_active", nullable = false)
