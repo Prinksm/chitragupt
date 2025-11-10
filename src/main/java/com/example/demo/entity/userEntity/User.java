@@ -25,10 +25,9 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
-    @Column(name = "first_name", nullable = false, length = 30)
+    @Column(name = "first_name", length = 30)
     private String firstName;
 
     @Column(name = "middle_name", length = 30)
@@ -48,6 +47,11 @@ public class User implements UserDetails {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    private String providerId;
+
+    @Enumerated(EnumType.STRING)
+    private AuthProviderType providerType;
 
     @ManyToMany
     @JoinTable(
