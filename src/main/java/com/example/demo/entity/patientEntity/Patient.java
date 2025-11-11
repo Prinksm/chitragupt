@@ -1,5 +1,6 @@
 package com.example.demo.entity.patientEntity;
 
+import com.example.demo.entity.userEntity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -19,8 +20,10 @@ public class Patient {
     @SequenceGenerator(name = "patient_id_seq", sequenceName = "patient_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "user_id", nullable = false, unique = true)
-    private long userId;
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true) // This specifies the shared column name in the DB
+    @MapsId // This tells Hibernate to use the primary key of the 'user' association for this entity's ID
+    private User user;
 
     @Column(name = "firstname", nullable = false, length = 30)
     private String firstName;

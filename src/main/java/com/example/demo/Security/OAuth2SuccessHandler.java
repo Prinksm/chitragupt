@@ -6,7 +6,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -15,12 +17,14 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Duration;
 
 @Component
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final AuthService authService;
     private final ObjectMapper objectMapper;
+    private final AuthUtil authUtil;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -29,7 +33,21 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
         String registrationId = token.getAuthorizedClientRegistrationId();
-        ResponseEntity<LogInResponseDto> loginResponse = authService.handleOauth2LoginRequest(oAuth2User , email , registrationId);
+        ResponseEntity<LogInResponseDto> loginResponse = authService.handleOauth2LoginRequest(oAuth2User , email , registrationId, response);
+        String accessToken =loginResponse.getBody().getJwt();
+        ResponseCookie cookie= ResponseCookie.from("accessToken",accessToken).httpOnly(false)
+                .path("/")
+                .maxAge(Duration.ofSeconds(300))
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        String refreshToken = loginResponse.getBody().getRefreshToken();
+        ResponseCookie refreshcookie = ResponseCookie.from("refreshToken",refreshToken).httpOnly(false)
+                .path("/")
+                .maxAge(Duration.ofSeconds(1200))
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshcookie.toString());
 
         response.setStatus(loginResponse.getStatusCode().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

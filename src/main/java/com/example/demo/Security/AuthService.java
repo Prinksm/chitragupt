@@ -6,11 +6,16 @@ import com.example.demo.dto.SignUpRequestDto;
 import com.example.demo.dto.SignUpResponseDto;
 import com.example.demo.entity.patientEntity.Patient;
 import com.example.demo.entity.userEntity.AuthProviderType;
+import com.example.demo.entity.userEntity.Roles;
 import com.example.demo.entity.userEntity.User;
 import com.example.demo.repository.PatientRepository;
+import com.example.demo.repository.RolesRepository;
 import com.example.demo.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,6 +26,10 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -29,8 +38,9 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PatientRepository patientRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RolesRepository rolesRepository;
 
-    public LogInResponseDto login(LogInRequestDto loginRequestDto) {
+    public LogInResponseDto login(LogInRequestDto loginRequestDto , HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
         );
@@ -38,8 +48,21 @@ public class AuthService {
         User user = (User) authentication.getPrincipal();
 
         String token = authUtil.generateAccessToken(user);
+        ResponseCookie cookie= ResponseCookie.from("accessToken",token).httpOnly(false)
+                .path("/")
+                .maxAge(Duration.ofSeconds(300))
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return new LogInResponseDto(token, user.getId());
+        String refreshToken = authUtil.generateRefreshToken(user);
+        ResponseCookie refreshcookie = ResponseCookie.from("refreshToken",refreshToken).httpOnly(false)
+                .path("/")
+                .maxAge(Duration.ofSeconds(1200))
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshcookie.toString());
+
+        return new LogInResponseDto(token, refreshToken,user.getId());
     }
 
     public User signUpInternal(SignUpRequestDto signupRequestDto, AuthProviderType authProviderType, String providerId){
@@ -60,11 +83,18 @@ public class AuthService {
             users.setPassword(passwordEncoder.encode(signupRequestDto.getPassword()));
         }
 
+        Set<Roles> roles = new HashSet<>();
+        Roles patientRole = rolesRepository.findByName("PATIENT").orElseThrow(()-> new RuntimeException("Patient role not found"));
+        roles.add(patientRole);
 
+        Roles userRole = rolesRepository.findByName("USER").orElseThrow(()-> new RuntimeException("User role not found"));
+        roles.add(userRole);
+
+        users.setRoles(roles);
         users =userRepository.save(users);
 
         Patient patient = new Patient();
-        patient.setUserId(users.getId());
+        patient.setUser(users);
         patient.setFirstName(users.getFirstName());
         patient.setMiddleName(users.getMiddleName());
         patient.setLastName(users.getLastName());
@@ -80,7 +110,7 @@ public class AuthService {
 
 
     @Transactional
-    public ResponseEntity<LogInResponseDto> handleOauth2LoginRequest(OAuth2User oAuth2User, String email, String registrationId) {
+    public ResponseEntity<LogInResponseDto> handleOauth2LoginRequest(OAuth2User oAuth2User, String email, String registrationId , HttpServletResponse response) {
         AuthProviderType providerType = authUtil.getProviderTypeFromRegistrationID(registrationId);
         String providerId = authUtil.determineProviderIdFromOAuth2User(oAuth2User , registrationId);
         String email1 = oAuth2User.getAttribute("email");
@@ -97,7 +127,8 @@ public class AuthService {
             user.setProviderType(providerType);
             userRepository.save(user);
             String token = authUtil.generateAccessToken(user);
-            return ResponseEntity.ok(new LogInResponseDto(token, user.getId()));
+            String refreshToken = authUtil.generateRefreshToken(user);
+            return ResponseEntity.ok(new LogInResponseDto(token,refreshToken, user.getId()));
 
         }else if(user != null) {
             if(email != null && !email.isBlank() && !email.equals(user.getUsername())) {
@@ -105,11 +136,13 @@ public class AuthService {
                 userRepository.save(user);
             }
             String token = authUtil.generateAccessToken(user);
-            return ResponseEntity.ok(new LogInResponseDto(token, user.getId()));
+            String refreshToken = authUtil.generateRefreshToken(user);
+            return ResponseEntity.ok(new LogInResponseDto(token, refreshToken,user.getId()));
 
         }else if (emailUser != null && emailUser.getPassword() != null && !emailUser.getPassword().isEmpty()) {
             String token = authUtil.generateAccessToken(emailUser);
-            return ResponseEntity.ok(new LogInResponseDto(token, emailUser.getId()));
+            String refreshToken = authUtil.generateRefreshToken(emailUser);
+            return ResponseEntity.ok(new LogInResponseDto(token, refreshToken,emailUser.getId()));
         } else {
             throw new BadCredentialsException("This email is already registered with provider "+emailUser.getProviderType());
         }

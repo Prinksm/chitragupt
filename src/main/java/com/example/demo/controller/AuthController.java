@@ -5,6 +5,7 @@ import com.example.demo.dto.LogInRequestDto;
 import com.example.demo.dto.LogInResponseDto;
 import com.example.demo.dto.SignUpRequestDto;
 import com.example.demo.dto.SignUpResponseDto;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,8 +20,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LogInResponseDto> login(@RequestBody LogInRequestDto loginRequestDto) {
-        return ResponseEntity.ok(authService.login(loginRequestDto));
+    public ResponseEntity<LogInResponseDto> login(@RequestBody LogInRequestDto loginRequestDto , HttpServletResponse response) {
+        return ResponseEntity.ok(authService.login(loginRequestDto , response));
     }
 
     @PostMapping("/signup")
