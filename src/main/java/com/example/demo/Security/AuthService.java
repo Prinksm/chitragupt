@@ -8,9 +8,9 @@ import com.example.demo.entity.patientEntity.Patient;
 import com.example.demo.entity.userEntity.AuthProviderType;
 import com.example.demo.entity.userEntity.Roles;
 import com.example.demo.entity.userEntity.User;
-import com.example.demo.repository.PatientRepository;
-import com.example.demo.repository.RolesRepository;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.*;
+import com.example.demo.services.EmailService;
+import com.example.demo.services.OtpService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -39,22 +38,35 @@ public class AuthService {
     private final PatientRepository patientRepository;
     private final PasswordEncoder passwordEncoder;
     private final RolesRepository rolesRepository;
+    private final OtpService otpService;
+    private final EmailService emailService;
 
     public LogInResponseDto login(LogInRequestDto loginRequestDto , HttpServletResponse response) {
+        User user = userRepository.findByEmail(loginRequestDto.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+
+        if (user.getPassword() == null) {
+            throw new BadCredentialsException("User signed up via OAuth. Please set a password to log in with email.");
+        }
+
+        if (user.getProviderType() == AuthProviderType.EMAIL && !user.isVerified()) {
+            throw new BadCredentialsException("User is not verified. Please verify your email.");
+        }
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
         );
 
-        User user = (User) authentication.getPrincipal();
+        User user1 = (User) authentication.getPrincipal();
 
-        String token = authUtil.generateAccessToken(user);
+        String token = authUtil.generateAccessToken(user1);
         ResponseCookie cookie= ResponseCookie.from("accessToken",token).httpOnly(false)
                 .path("/")
                 .maxAge(Duration.ofSeconds(300))
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        String refreshToken = authUtil.generateRefreshToken(user);
+        String refreshToken = authUtil.generateRefreshToken(user1);
         ResponseCookie refreshcookie = ResponseCookie.from("refreshToken",refreshToken).httpOnly(false)
                 .path("/")
                 .maxAge(Duration.ofSeconds(1200))
@@ -62,7 +74,7 @@ public class AuthService {
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshcookie.toString());
 
-        return new LogInResponseDto(token, refreshToken,user.getId());
+        return new LogInResponseDto(token, refreshToken,user1.getId());
     }
 
     public User signUpInternal(SignUpRequestDto signupRequestDto, AuthProviderType authProviderType, String providerId){
@@ -79,6 +91,7 @@ public class AuthService {
         users.setLastName(signupRequestDto.getLastName());
         users.setEmail(signupRequestDto.getEmail());
         users.setContactNumber(signupRequestDto.getContactNumber());
+        users.setVerified(false);
         if(authProviderType == AuthProviderType.EMAIL){
             users.setPassword(passwordEncoder.encode(signupRequestDto.getPassword()));
         }
@@ -105,6 +118,7 @@ public class AuthService {
 
     public SignUpResponseDto signup(SignUpRequestDto signupRequestDto) {
         User user = signUpInternal(signupRequestDto, AuthProviderType.EMAIL, null);
+        otpService.sendOtp(user.getEmail());
         return new SignUpResponseDto(user.getId(), user.getUsername());
     }
 
@@ -124,6 +138,7 @@ public class AuthService {
           signUpInternal(new SignUpRequestDto(firstName,null,oAuth2User.getAttribute("family_name"),null , email1 , null , null ),providerType, providerId);
             user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found after signup"));
             user.setProviderId(providerId);
+            user.setVerified(true);
             user.setProviderType(providerType);
             userRepository.save(user);
             String token = authUtil.generateAccessToken(user);

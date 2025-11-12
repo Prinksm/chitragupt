@@ -45,6 +45,9 @@ public class User implements UserDetails {
     @Transient
     private String confirmPassword;
 
+    @Column(name = "is_verified", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean verified = false;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
