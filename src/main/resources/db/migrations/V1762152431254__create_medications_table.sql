@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS medication.medications (
     FOREIGN KEY (concept_id) REFERENCES codeable_concept.concepts(concept_id)
 );
 
-CREATE TABLE IF NOT EXISTS medication_ingredients_mapping (
+CREATE TABLE IF NOT EXISTS medication.medication_ingredients_mapping (
     medication_id BIGINT NOT NULL,
     ingredient_id BIGINT NOT NULL,
     strength_id BIGINT NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS medication_ingredients_mapping (
     FOREIGN KEY (strength_id) REFERENCES medication.strengths(strength_id)
 );
 
-CREATE TABLE IF NOT EXISTS medication_dose_forms_mapping (
+CREATE TABLE IF NOT EXISTS medication.medication_dose_forms_mapping (
     medication_id BIGINT NOT NULL,
     dose_form_id BIGINT NOT NULL,
     PRIMARY KEY (medication_id, dose_form_id),
