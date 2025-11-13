@@ -19,8 +19,8 @@ spring:
   security.oauth2.client:
     registration:
       google:
-        client-id: 966586889081-ralgi6h3jd92v40he34f4p0b8sfoplta.apps.googleusercontent.com
-        client-secret: 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
+        client-id: ${GOOGLE_CLIENT_ID}
+        client-secret: ${GOOGLE_CLIENT_SECRET}
   flyway:
     enabled: true
     locations: classpath:db/migrations
@@ -28,7 +28,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: notification.chitragupt@gmail.com
-    password : lfsk glpx puuu hbhl
+    password : ${EMAIL_PASS}
     protocol: smtp
     properties:
       mail.smtp.auth: true
@@ -40,3 +40,5 @@ spring:
       org.flywaydb: DEBUG
 jwt:
   secretKey : ${SECRET_KEY}
+  accessTokenValidity : 600
+  refreshTokenValidity : 3600

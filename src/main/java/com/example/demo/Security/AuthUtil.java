@@ -19,9 +19,25 @@ import java.util.Date;
 public class AuthUtil {
     @Value("${jwt.secretKey}")
     private String jwtSecretKey;
+    @Value("${jwt.accessTokenValidity}")
+    private Long accessTokenValidity;
+    @Value("${jwt.refreshTokenValidity}")
+    private Long refreshTokenValidity;
 
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
+    }
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(getSecretKey())
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            log.error("Invalid JWT: {}", e.getMessage());
+            return false;
+        }
     }
 
     public String generateAccessToken(User user) {
@@ -29,7 +45,7 @@ public class AuthUtil {
                 .subject(user.getEmail())
                 .claim("userId", user.getId().toString())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * accessTokenValidity))
                 .signWith(getSecretKey())
                 .compact();
     }
@@ -39,7 +55,7 @@ public class AuthUtil {
                 .subject(user.getEmail())
                 .claim("userId", user.getId().toString())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * refreshTokenValidity))
                 .signWith(getSecretKey())
                 .compact();
     }
