@@ -1,0 +1,7 @@
+ALTER TABLE users.users
+ALTER COLUMN password TYPE VARCHAR(300);
+
+
+ALTER TABLE users.users
+ADD COLUMN IF NOT EXISTS provider_id VARCHAR(100),
+ADD COLUMN IF NOT EXISTS provider_type VARCHAR(20);
