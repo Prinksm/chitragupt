@@ -28,8 +28,6 @@ public class AuthController {
     private final AuthUtil authUtil;
     private final UserRepository userRepo;
 
-
-
     @PostMapping("/login")
     public ResponseEntity<LogInResponseDto> login(@RequestBody LogInRequestDto loginRequestDto, HttpServletResponse response) {
         return ResponseEntity.ok(authService.login(loginRequestDto, response));

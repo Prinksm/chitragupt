@@ -8,7 +8,13 @@ import java.util.Set;
 
 @Entity
 @Table(name = "patient_contact", schema = "patient")
-@Data
+@Getter
+@Setter
+@ToString(exclude = {
+        "patient",
+        "contactAddresses",
+        "contactTelecoms"
+})
 @NoArgsConstructor
 @AllArgsConstructor
 public class PatientContact {
@@ -24,13 +30,13 @@ public class PatientContact {
     @Column(name = "relationship_type", length = 50)
     private String relationshipType;
 
-    @Column(name = "firstName", nullable = false, length = 30)
+    @Column(name = "firstname", nullable = false, length = 30)
     private String firstName;
 
-    @Column(name = "middleName", length = 30)
+    @Column(name = "middlename", length = 30)
     private String middleName;
 
-    @Column(name = "lastName", length = 30)
+    @Column(name = "lastname", length = 30)
     private String lastName;
 
     @Column(name = "period_start")
