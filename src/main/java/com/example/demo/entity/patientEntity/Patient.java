@@ -1,5 +1,6 @@
 package com.example.demo.entity.patientEntity;
 
+import com.example.demo.entity.userEntity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -10,22 +11,34 @@ import java.util.Set;
 
 @Entity
 @Table(name = "patient", schema = "patient")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {
+        "patientContacts",
+        "patientAddresses",
+        "patientTelecoms",
+        "patientAllergies"
+})
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patient_id_seq")
     @SequenceGenerator(name = "patient_id_seq", sequenceName = "patient_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "firstName", nullable = false, length = 30)
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true) // This specifies the shared column name in the DB
+    @MapsId // This tells Hibernate to use the primary key of the 'user' association for this entity's ID
+    private User user;
+
+    @Column(name = "firstname", nullable = false, length = 30)
     private String firstName;
 
-    @Column(name = "middleName", length = 30)
+    @Column(name = "middlename", length = 30)
     private String middleName;
 
-    @Column(name = "lastName", length = 30)
+    @Column(name = "lastname", length = 30)
     private String lastName;
 
     @Column(name = "birth_date")
@@ -34,7 +47,7 @@ public class Patient {
     @Column(length = 20)
     private String gender;
 
-    @Column(name = "maritalStatus", length = 30)
+    @Column(name = "maritalstatus", length = 30)
     private String maritalStatus;
 
     @Column(name = "is_active", nullable = false)
