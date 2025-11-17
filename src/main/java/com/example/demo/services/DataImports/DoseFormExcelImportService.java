@@ -39,6 +39,7 @@ public class DoseFormExcelImportService {
                 String code = decimalFormat.format(numericValue);
 
                 String display = row.getCell(2).getStringCellValue().trim();
+                String description = row.getCell(3).getStringCellValue().trim();
                 System.out.println(systemUrl);
                 System.out.println(code);
                 System.out.println(display);
@@ -50,7 +51,7 @@ public class DoseFormExcelImportService {
                         });
 
                 Concepts concept = new Concepts();
-                concept.setConceptName(display);
+                concept.setConceptName(description);
                 concept.setDescription(display);
                 concept.setType("Dose Form");
                 concept = conceptRepo.save(concept);
