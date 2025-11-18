@@ -11,9 +11,16 @@ import java.util.Set;
 
 @Entity
 @Table(name = "patient", schema = "patient")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {
+        "patientContacts",
+        "patientAddresses",
+        "patientTelecoms",
+        "patientAllergies"
+})
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patient_id_seq")

@@ -44,6 +44,8 @@ public class AuthUtil {
         return Jwts.builder()
                 .subject(user.getEmail())
                 .claim("userId", user.getId().toString())
+                .claim("role",user.getRoles().toString())
+                .claim("userName",user.getFirstName().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * accessTokenValidity))
                 .signWith(getSecretKey())

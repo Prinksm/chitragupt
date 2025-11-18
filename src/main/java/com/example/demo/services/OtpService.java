@@ -24,7 +24,7 @@ public class OtpService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
 
-//        otpRepository.findByUserId(user.getId()).ifPresent(existingOtp -> {
+//        otpRepository.findByUser(user.getId()).ifPresent(existingOtp -> {
 //            otpRepository.delete(existingOtp);
 //        });
 

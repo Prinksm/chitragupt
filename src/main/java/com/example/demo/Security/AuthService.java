@@ -9,6 +9,7 @@ import com.example.demo.entity.userEntity.AuthProviderType;
 import com.example.demo.entity.userEntity.Roles;
 import com.example.demo.entity.userEntity.User;
 import com.example.demo.repository.*;
+import com.example.demo.repository.Patient.PatientRepository;
 import com.example.demo.services.EmailService;
 import com.example.demo.services.OtpService;
 import jakarta.servlet.http.HttpServletResponse;
