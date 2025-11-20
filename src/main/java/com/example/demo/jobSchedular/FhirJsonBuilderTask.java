@@ -26,7 +26,7 @@ public class FhirJsonBuilderTask  {
 
     }
 
-    @Scheduled(cron = "0 10 * * *")
+    @Scheduled(cron = "0 0 10 * * ?")
     public void executePatientFhirBuilder() {
         if (!isRunning.get()) {
             isRunning.set(true);

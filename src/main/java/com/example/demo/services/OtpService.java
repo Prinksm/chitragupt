@@ -2,8 +2,8 @@ package com.example.demo.services;
 
 import com.example.demo.entity.userEntity.Otp;
 import com.example.demo.entity.userEntity.User;
-import com.example.demo.repository.OtpRepository;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.AuthCommon.OtpRepository;
+import com.example.demo.repository.AuthCommon.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

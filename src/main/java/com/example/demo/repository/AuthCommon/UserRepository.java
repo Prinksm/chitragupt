@@ -1,4 +1,4 @@
-package com.example.demo.repository;
+package com.example.demo.repository.AuthCommon;
 
 import com.example.demo.entity.userEntity.AuthProviderType;
 import com.example.demo.entity.userEntity.User;

@@ -28,8 +28,8 @@ public class Patient {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true) // This specifies the shared column name in the DB
-    @MapsId // This tells Hibernate to use the primary key of the 'user' association for this entity's ID
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @MapsId
     private User user;
 
     @Column(name = "firstname", nullable = false, length = 30)

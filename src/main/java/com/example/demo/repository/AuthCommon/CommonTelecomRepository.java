@@ -1,4 +1,4 @@
-package com.example.demo.repository;
+package com.example.demo.repository.AuthCommon;
 import com.example.demo.entity.userEntity.CommonTelecom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface CommonTelecomRepository extends JpaRepository<CommonTelecom, Long> {
     Optional<CommonTelecom> findById(Long id);
+    Optional<CommonTelecom>findByValue(String value);
 
     // Custom query to find telecoms by patient ID
     @Query("SELECT ct FROM CommonTelecom ct JOIN PatientTelecom pt ON ct.id = pt.telecom.Id WHERE pt.patient.Id = :patientId")
