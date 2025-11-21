@@ -1,6 +1,6 @@
-package com.example.demo.PatientContact;
+package com.example.demo.patientContact;
 
-import com.example.demo.PatientContact.dto.PatientContactDto;
+import com.example.demo.patientContact.dto.PatientContactDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

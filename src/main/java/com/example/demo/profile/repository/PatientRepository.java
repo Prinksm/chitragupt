@@ -1,4 +1,4 @@
-package com.example.demo.repository.Patient;
+package com.example.demo.profile.repository;
 
 import com.example.demo.entity.patientEntity.Patient;
 import com.example.demo.entity.userEntity.User;

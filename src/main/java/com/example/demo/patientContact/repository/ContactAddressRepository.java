@@ -1,4 +1,4 @@
-package com.example.demo.PatientContact.repository;
+package com.example.demo.patientContact.repository;
 
 import com.example.demo.entity.patientEntity.ContactAddress;
 import org.springframework.data.jpa.repository.JpaRepository;

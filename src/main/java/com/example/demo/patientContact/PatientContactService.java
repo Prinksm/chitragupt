@@ -1,10 +1,10 @@
-package com.example.demo.PatientContact;
-import com.example.demo.PatientContact.dto.ContactAddressDto;
-import com.example.demo.PatientContact.dto.ContactTelecomDto;
-import com.example.demo.PatientContact.dto.PatientContactDto;
-import com.example.demo.PatientContact.repository.ContactAddressRepository;
-import com.example.demo.PatientContact.repository.ContactTelecomRepository;
-import com.example.demo.PatientContact.repository.PatientContactRepository;
+package com.example.demo.patientContact;
+import com.example.demo.patientContact.dto.ContactAddressDto;
+import com.example.demo.patientContact.dto.ContactTelecomDto;
+import com.example.demo.patientContact.dto.PatientContactDto;
+import com.example.demo.patientContact.repository.ContactAddressRepository;
+import com.example.demo.patientContact.repository.ContactTelecomRepository;
+import com.example.demo.patientContact.repository.PatientContactRepository;
 import com.example.demo.entity.patientEntity.ContactAddress;
 import com.example.demo.entity.patientEntity.ContactTelecom;
 import com.example.demo.entity.patientEntity.PatientContact;
@@ -12,7 +12,7 @@ import com.example.demo.entity.userEntity.CommonAddress;
 import com.example.demo.entity.userEntity.CommonTelecom;
 import com.example.demo.repository.AuthCommon.CommonAddressRepository;
 import com.example.demo.repository.AuthCommon.CommonTelecomRepository;
-import com.example.demo.repository.Patient.PatientRepository;
+import com.example.demo.profile.repository.PatientRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -319,6 +319,12 @@ public class PatientContactService {
     //delete
     @Transactional
     //contact id
+    /**
+     * @Author Prinkal Mahajan
+     * @return void
+     * @paramaeter
+     * @descri
+     */
     public void deletePatientContact(Long id) {
         PatientContact patientContact = patientContactRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("PatientContact not found with id: " + id));

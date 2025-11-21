@@ -1,6 +1,7 @@
 package com.example.demo.entity.patientEntity;
 
 import com.example.demo.entity.userEntity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -63,12 +64,15 @@ public class Patient {
     @Column(name = "fhir")
     private String fhir;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PatientContact> patientContacts;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PatientAddress> patientAddresses;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PatientTelecom> patientTelecoms;
 

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class PatientTelecom {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patient_telecom_id_seq")
-    @SequenceGenerator(name = "patient_telecom_id_seq", sequenceName = "patient.patient_telecom_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "patient_telecom_id_seq", sequenceName = "patient_telecom_id_seq", allocationSize = 1)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

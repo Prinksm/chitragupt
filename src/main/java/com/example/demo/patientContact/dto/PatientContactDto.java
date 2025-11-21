@@ -1,4 +1,4 @@
-package com.example.demo.PatientContact.dto;
+package com.example.demo.patientContact.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
