@@ -13,6 +13,7 @@ import com.example.demo.entity.userEntity.CommonTelecom;
 import com.example.demo.repository.AuthCommon.CommonAddressRepository;
 import com.example.demo.repository.AuthCommon.CommonTelecomRepository;
 import com.example.demo.profile.repository.PatientRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ProfileAddService {
+public class ProfileService {
     private final PatientRepository patientRepository;
     private final PatientAddressRepository patientAddressRepository;
     private final PatientTelecomRepository patientTelecomRepository;
@@ -163,6 +164,56 @@ public class ProfileAddService {
 
         ConvertToDto todto = new ConvertToDto();
        return todto.convertToDto(patient);
+    }
+
+
+
+    @Transactional
+    public PatientDto getPatientProfile(Long patientId) {
+        try {
+            Patient patient = patientRepository.findById(patientId)
+                    .orElseThrow(() -> new RuntimeException("Patient not found with id: " + patientId));
+            ConvertToDto todto = new ConvertToDto();
+            return todto.convertToDto(patient);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get patient profile: " + e.getMessage(), e);
+        }
+    }
+
+    @Transactional
+    public void deletePatientTelecom(Long patientId, Long telecomId) {
+        PatientTelecom telecomToDelete = patientTelecomRepository.findByIdAndPatientId(telecomId, patientId)
+                .orElseThrow(() -> new RuntimeException("Telecom not found with id: " + telecomId +
+                        " for patient: " + patientId));
+        long telecomCount = patientTelecomRepository.countByPatientId(patientId);
+        if (telecomCount <= 1) {
+            throw new IllegalStateException("Patient must have at least one telecom");
+        }
+        Long commonTelecomId = telecomToDelete.getTelecom().getId();
+        patientTelecomRepository.delete(telecomToDelete);
+        boolean isCommonTelecomStillUsed = patientTelecomRepository.existsByTelecomId(commonTelecomId);
+        if (!isCommonTelecomStillUsed) {
+            commonTelecomRepository.deleteById(commonTelecomId);
+        }
+    }
+
+    @Transactional
+    public void deletePatientAddress(Long patientId, Long addressId) {
+        PatientAddress addressToDelete = patientAddressRepository.findByIdAndPatientId(addressId, patientId)
+                .orElseThrow(() -> new RuntimeException("Address not found with id: " + addressId +
+                        " for patient: " + patientId));
+
+        long addressCount = patientAddressRepository.countByPatientId(patientId);
+        if (addressCount <= 1) {
+            throw new IllegalStateException("Patient must have at least one address");
+        }
+
+        Long commonAddressId = addressToDelete.getAddress().getId();
+        patientAddressRepository.delete(addressToDelete);
+        boolean isCommonAddressStillUsed = patientAddressRepository.existsByAddressId(commonAddressId);
+        if (!isCommonAddressStillUsed) {
+            commonAddressRepository.deleteById(commonAddressId);
+        }
     }
 
 }
