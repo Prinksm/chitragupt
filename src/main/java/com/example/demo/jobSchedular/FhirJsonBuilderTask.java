@@ -1,6 +1,7 @@
 package com.example.demo.jobSchedular;
 
 import com.example.demo.services.fhirBuilder.MedicationFhirBuilderService;
+import com.example.demo.services.fhirBuilder.MedicationStatementBuilderService;
 import com.example.demo.services.fhirBuilder.PatientFhirBuilderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,13 +19,22 @@ public class FhirJsonBuilderTask  {
     @Autowired
     private  PatientFhirBuilderService patientFhirBuilderService;
 
+    @Autowired
+    private MedicationStatementBuilderService medicationStatementBuilderService;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    @Scheduled(cron = "* 0 10 * * * ")
-    public void medicationExecute() {
+//    @Scheduled(initialDelay = 5000)
+//    public void medicationExecute() {
+//
+//            medicationFhirBuilderService.MedicationFhirAdd();
+//
+//    }
+    @Scheduled(initialDelay = 5000)
+    public void medicationStatementExecute() {
 
-            medicationFhirBuilderService.MedicationFhirAdd();
+        medicationStatementBuilderService.addMedicationStatementFhir();
 
     }
+
 
     @Scheduled(cron = "* 0 10 * * * ")
     public void executePatientFhirBuilder() {
