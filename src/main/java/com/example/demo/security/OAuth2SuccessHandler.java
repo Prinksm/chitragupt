@@ -34,6 +34,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String email = oAuth2User.getAttribute("email");
         String registrationId = token.getAuthorizedClientRegistrationId();
         ResponseEntity<LogInResponseDto> loginResponse = authService.handleOauth2LoginRequest(oAuth2User , email , registrationId, response);
+//         ResponseEntity<LogInResponseDto> loginResponse = authService.handleOauth2LoginRequest(oAuth2User , email , registrationId, response);
         String accessToken =loginResponse.getBody().getJwt();
         ResponseCookie cookie= ResponseCookie.from("accessToken",accessToken).httpOnly(false)
                 .path("/")
@@ -48,9 +49,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshcookie.toString());
-
-        response.setStatus(loginResponse.getStatusCode().value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(objectMapper.writeValueAsString(loginResponse.getBody()));
+        response.sendRedirect("http://localhost:4200/user");
+//        response.setStatus(loginResponse.getStatusCode().value());
+//        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+//        response.getWriter().write(objectMapper.writeValueAsString(loginResponse.getBody()));
     }
 }

@@ -28,6 +28,8 @@ public class AuthController {
     private final AuthUtil authUtil;
     private final UserRepository userRepo;
 
+
+
     @PostMapping("/login")
     public ResponseEntity<LogInResponseDto> login(@RequestBody LogInRequestDto loginRequestDto, HttpServletResponse response) {
         return ResponseEntity.ok(authService.login(loginRequestDto, response));
@@ -48,25 +50,33 @@ public class AuthController {
         return ResponseEntity.ok("OTP sent successfully");
     }
 
+
     @PostMapping("/verify-otp")
-    public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, String>> verifyOtp(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String otp = request.get("otp");
+
         otpService.verifyOtp(email, otp);
-        return ResponseEntity.ok("User verified successfully");
+
+        Map<String, String> response = Map.of("message", "User verified successfully");
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/send-password-link")
-    public ResponseEntity<String> sendPasswordLink(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, String>> sendPasswordLink(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         passwordResetService.sendPasswordResetLink(email);
-        return ResponseEntity.ok("Password reset link sent successfully");
-    }
+        Map<String, String> response = Map.of("message", "Password reset link sent successfully");
+        return ResponseEntity.ok(response);
 
+    }
+//Forget password & needs password
     @PostMapping("/update-password")
-    public ResponseEntity<String> updatePassword(@RequestBody PasswordResetRequestDto request) {
+    public ResponseEntity<Map<String, String>>updatePassword(@RequestBody PasswordResetRequestDto request) {
         passwordResetService.updatePasswordWithToken(request.getToken(), request.getPassword(), request.getConfirmPassword());
-        return ResponseEntity.ok("Password updated successfully");
+        Map<String, String> response = Map.of("message", "Password updated successfully");
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/needs-password")
@@ -112,5 +122,6 @@ public class AuthController {
 
 
     }
+
 
 }

@@ -19,14 +19,14 @@ public class FhirJsonBuilderTask  {
     private  PatientFhirBuilderService patientFhirBuilderService;
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    @Scheduled(initialDelay = 5000)
+    @Scheduled(cron = "* 0 10 * * * ")
     public void medicationExecute() {
 
             medicationFhirBuilderService.MedicationFhirAdd();
 
     }
 
-    @Scheduled(cron = "0 0 10 * * ?")
+    @Scheduled(cron = "* 0 10 * * * ")
     public void executePatientFhirBuilder() {
         if (!isRunning.get()) {
             isRunning.set(true);

@@ -9,4 +9,6 @@ import java.util.Optional;
 
 public interface ConceptCodeMapperRepo extends JpaRepository<ConceptCodeMapper,String> {
     Optional<ConceptCodeMapper> findByConceptId(Long conceptId);
+
+    Optional<ConceptCodeMapper> findByCode(String code);
 }
