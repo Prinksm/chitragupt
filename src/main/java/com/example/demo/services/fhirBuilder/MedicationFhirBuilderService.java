@@ -46,12 +46,10 @@ public class MedicationFhirBuilderService {
         System.out.println(medsWithoutFhir);
         for (Medications med : medsWithoutFhir) {
             String fhirJson = buildMedication(med);
-//            med.setFhirJson(fhirJson);
+            med.setFhirJson(fhirJson);
             System.out.println(fhirJson + " " + med.getBrandName());
         }
-        // the fhir json field if null gets the medication object
-        //build the fhir json method called
-        //stored in the medication entity
+
 
     }
 
@@ -69,15 +67,15 @@ public class MedicationFhirBuilderService {
         fhirMed.setCode(medicationCode);
         //Medication dose form
         MedicationDoseMapper doseMap = medicineDoseMapperRepo.findByMedicationId(med.getMedicationId())
-                .orElseThrow(()->new RuntimeException("Medication dose form map does not exists"));
-        DoseForms doseForms = doseFormRepo.findById(doseMap.getDoseformId()).orElseThrow(()-> new RuntimeException("Dose form id does not exists"));
+                .orElseThrow(() -> new RuntimeException("Medication dose form map does not exists"));
+        DoseForms doseForms = doseFormRepo.findById(doseMap.getDoseformId()).orElseThrow(() -> new RuntimeException("Dose form id does not exists"));
 
         ConceptCodeMapper doseCodeMap = conceptCodeMapperRepo.findByConceptId(doseForms.getConceptId())
                 .orElseThrow(() -> new RuntimeException(String.valueOf(doseForms.getConceptId())));
         CodeSystem doseCodeSystem = codeSystemRepo.findById(doseCodeMap.getSystemId())
                 .orElseThrow(() -> new RuntimeException("CodeSystem not found"));
-        CodeableConcept doseCode = buildCodeableConcept(med.getBrandName(), codeSystem, mapping);
-        String doseText =  doseCodeMap.getDisplayText();
+//        CodeableConcept doseCode = buildCodeableConcept(med.getBrandName(), codeSystem, mapping);
+        String doseText = doseCodeMap.getDisplayText();
 
         CodeableConcept doseform = buildCodeableConcept(doseText, doseCodeSystem, doseCodeMap);
 
@@ -107,7 +105,6 @@ public class MedicationFhirBuilderService {
                     new Medication.MedicationIngredientComponent();
 
 
-
             // Attach the Ratio to "strength"
             Strengths ingStrength = strengthRepo.findById(ingredient.getStrengthId())
                     .orElseThrow(() -> new RuntimeException("Stength does not exists"));
@@ -134,13 +131,12 @@ public class MedicationFhirBuilderService {
         }
 
 
-
         FhirContext ctx = FhirContext.forR4();
         return ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(fhirMed);
 
     }
 
-    private CodeableConcept buildCodeableConcept(String displayText, CodeSystem codeSystem, ConceptCodeMapper mapping) {
+    public CodeableConcept buildCodeableConcept(String displayText, CodeSystem codeSystem, ConceptCodeMapper mapping) {
         CodeableConcept concept = new CodeableConcept();
 
         if (codeSystem != null && mapping != null) {

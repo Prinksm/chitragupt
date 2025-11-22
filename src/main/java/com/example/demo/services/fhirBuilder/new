@@ -1,0 +1,169 @@
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import org.hl7.fhir.r4.model.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+        public class MedicationStatementFHIRBuilder {
+
+            private final FhirContext fhirContext = FhirContext.forR4();
+
+            /**
+             * Build a FHIR MedicationStatement from DB entities
+             */
+            public MedicationStatement buildMedicationStatement(
+                    MedicationStatements msEntity,
+                    Prescription prescription,               // your Prescription entity
+                    Dosages dosageEntity,                     // optional, can be null
+                    Timing timingEntity                        // optional, can be null
+            ) {
+                // 1️⃣ Parse Medication JSON from DB
+                IParser parser = fhirContext.newJsonParser();
+                Medication medication = parser.parseResource(Medication.class, msEntity.getFhirJson());
+
+                // 2️⃣ Set a FHIR-safe contained ID
+                String containedMedId = "med" + msEntity.getMedicationId();
+                medication.setId(containedMedId);
+
+                // Optional: preserve DB ID in identifier
+                medication.addIdentifier()
+                        .setSystem("http://your-system/medication-id")
+                        .setValue(msEntity.getMedicationId().toString());
+
+                // 3️⃣ Build MedicationStatement
+                MedicationStatement ms = new MedicationStatement();
+                ms.setId("ms-" + msEntity.getStatementId());
+
+                // Set patient reference
+                ms.setSubject(new Reference("Patient/" + prescription.getPatientId()));
+
+                // Contained medication
+                ms.getContained().add(medication);
+                ms.setMedication(new Reference("#" + containedMedId));
+
+                // Set status from DB
+                ms.setStatus(MedicationStatement.MedicationStatementStatus.fromCode(msEntity.getStatus().toLowerCase()));
+
+                // Optional: notes
+                if (msEntity.getNotes() != null) {
+                    ms.addNote(new Annotation().setText(msEntity.getNotes()));
+                }
+
+                // 4️⃣ Dosage
+                if (dosageEntity != null) {
+                    MedicationStatement.MedicationStatementDosageComponent dosageComponent =
+                            new MedicationStatement.MedicationStatementDosageComponent();
+
+                    // Dose quantity
+                    if (dosageEntity.getAmount() != null && dosageEntity.getAmountUnitId() != null) {
+                        SimpleQuantity dose = new SimpleQuantity()
+                                .setValue(dosageEntity.getAmount());
+                        // Optionally resolve unit from amountUnitId
+                        dosageComponent.setDose(dose);
+                    }
+
+                    // Route (optional, resolve from routeId)
+                    // dosageComponent.setRoute(new CodeableConcept(...));
+
+                    // Timing
+                    if (timingEntity != null) {
+                        Timing timing = new Timing();
+
+                        // Frequency / period
+                        if (timingEntity.getFrequency() != null) {
+                            timing.setRepeat(new Timing.TimingRepeatComponent().setFrequency(timingEntity.getFrequency()));
+                        }
+                        if (timingEntity.getPeriod() != null && timingEntity.getPeriodUnitId() != null) {
+                            timing.getRepeat().setPeriod(timingEntity.getPeriod().doubleValue());
+                            // Optionally set unit from periodUnitId
+                        }
+
+                        // Time of day
+                        if (timingEntity.getTimeOfDay() != null) {
+                            timing.getRepeat().addWhen(Timing.EventTiming.MORN); // example mapping
+                        }
+
+                        dosageComponent.setTiming(timing);
+                    }
+
+                    // Instruction
+                    if (dosageEntity.getInstruction() != null) {
+                        dosageComponent.setText(dosageEntity.getInstruction());
+                    }
+
+                    ms.addDosage(dosageComponent);
+                }
+
+                // 5️⃣ Reason codes (if your prescription has multiple reason IDs)
+                if (prescription.getReasonIds() != null && !prescription.getReasonIds().isEmpty()) {
+                    List<CodeableConcept> reasonCodes = new ArrayList<>();
+                    for (Long reasonId : prescription.getReasonIds()) {
+                        // Fetch ConceptCodeMapper from DB
+                        ConceptCodeMapper reasonCodeMap = conceptCodeMapperRepo.findByConceptId(reasonId)
+                                .orElseThrow(() -> new RuntimeException("Reason code not found: " + reasonId));
+
+                        CodeSystem cs = codeSystemRepo.findById(reasonCodeMap.getSystemId())
+                                .orElseThrow(() -> new RuntimeException("Code system not found: " + reasonCodeMap.getSystemId()));
+
+                        CodeableConcept cc = medFhirService.buildCodeableConcept(
+                                reasonCodeMap.getDisplayText(),
+                                cs,
+                                reasonCodeMap
+                        );
+                        reasonCodes.add(cc);
+                    }
+                    ms.setReasonCode(reasonCodes);
+                }
+
+                // 6️⃣ Effective dates
+                if (msEntity.getEffectiveStartDate() != null) {
+                    ms.setEffective(new Period()
+                            .setStart(msEntity.getEffectiveStartDate())
+                            .setEnd(msEntity.getEffectiveEndDate()));
+                }
+
+                return ms;
+            }
+
+            /**
+             * Helper to serialize to JSON
+             */
+            public String toJson(MedicationStatement ms) {
+                IParser parser = fhirContext.newJsonParser();
+                parser.setPrettyPrint(true);
+                return parser.encodeResourceToString(ms);
+            }
+        }
+
+
+// Assuming ms is your MedicationStatement object
+org.hl7.fhir.r4.model.Dosage dosage = new org.hl7.fhir.r4.model.Dosage();
+
+// Set timing, if you have it
+Timing timing = new Timing();
+// ... configure timing.repeat, timing.event, etc. ...
+dosage.setTiming(timing);
+
+// Set dose and rate
+Dosage.DosageDoseAndRateComponent doseAndRate = new Dosage.DosageDoseAndRateComponent();
+
+// Build a Quantity for the dose
+Quantity doseQuantity = new Quantity()
+    .setValue(dosages.getAmount())
+    .setUnit(amountCodeMap.getDisplayText())
+    .setSystem(amountCodeSystem.getSystemName())
+    .setCode(amountCodeMap.getCode());
+
+doseAndRate.setDose(doseQuantity);
+
+// (Optional) if you have rate (e.g. mg per hour), set rate too
+//Quantity rateQuantity = new Quantity().setValue(...).setUnit(...);
+//doseAndRate.setRate(rateQuantity);
+
+dosage.addDoseAndRate(doseAndRate);
+
+// (Optional) set route, site, method, etc.
+// dosage.setRoute(new CodeableConcept().addCoding(...));
+
+ms.addDosage(dosage);

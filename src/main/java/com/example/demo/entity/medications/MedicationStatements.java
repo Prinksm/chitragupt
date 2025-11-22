@@ -10,6 +10,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -44,10 +45,10 @@ public class MedicationStatements{
 
 
     @Column(name = "effective_start_date")
-    private LocalDateTime effectiveStartDate;
+    private Date effectiveStartDate;
 
     @Column(name = "effective_end_date")
-    private LocalDateTime effectiveEndDate;
+    private Date effectiveEndDate;
 
     @Column(name = "notes", length = 500)
     private String notes;
