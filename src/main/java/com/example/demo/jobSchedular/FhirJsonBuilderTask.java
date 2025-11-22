@@ -22,13 +22,13 @@ public class FhirJsonBuilderTask  {
     @Autowired
     private MedicationStatementBuilderService medicationStatementBuilderService;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-//    @Scheduled(initialDelay = 5000)
-//    public void medicationExecute() {
-//
-//            medicationFhirBuilderService.MedicationFhirAdd();
-//
-//    }
-    @Scheduled(initialDelay = 5000)
+    @Scheduled(cron = "* 0 11 * * * ")
+    public void medicationExecute() {
+
+            medicationFhirBuilderService.MedicationFhirAdd();
+
+    }
+    @Scheduled(cron = "* 0 12 * * * ")
     public void medicationStatementExecute() {
 
         medicationStatementBuilderService.addMedicationStatementFhir();
