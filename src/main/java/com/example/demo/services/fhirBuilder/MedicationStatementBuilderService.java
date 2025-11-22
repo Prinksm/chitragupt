@@ -52,7 +52,7 @@ public class MedicationStatementBuilderService {
         System.out.println(medStatementWithoutFhir);
         for (MedicationStatements med : medStatementWithoutFhir) {
             String fhirJson = buildMedication(med);
-//            med.setFhirJson(fhirJson);
+            med.setFhirJson(fhirJson);
             System.out.println(fhirJson );
         }
     }
