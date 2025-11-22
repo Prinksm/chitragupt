@@ -1,4 +1,4 @@
-package com.example.demo.Security;
+package com.example.demo.security;
 
 import com.example.demo.entity.userEntity.AuthProviderType;
 import com.example.demo.entity.userEntity.User;

@@ -1,7 +1,7 @@
-package com.example.demo.Security;
+package com.example.demo.security;
 
 import com.example.demo.entity.userEntity.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.AuthCommon.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

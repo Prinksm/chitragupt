@@ -1,5 +1,6 @@
 package com.example.demo.entity.patientEntity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -51,9 +52,11 @@ public class PatientContact {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ContactAddress> contactAddresses;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ContactTelecom> contactTelecoms;
 

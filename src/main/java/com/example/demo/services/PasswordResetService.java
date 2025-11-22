@@ -2,8 +2,8 @@ package com.example.demo.services;
 
 import com.example.demo.entity.userEntity.PasswordResetToken;
 import com.example.demo.entity.userEntity.User;
-import com.example.demo.repository.PasswordResetTokenRepository;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.AuthCommon.PasswordResetTokenRepository;
+import com.example.demo.repository.AuthCommon.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

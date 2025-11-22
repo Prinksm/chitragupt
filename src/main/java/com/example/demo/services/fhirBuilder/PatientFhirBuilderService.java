@@ -7,12 +7,12 @@ import com.example.demo.entity.patientEntity.Patient;
 import com.example.demo.entity.patientEntity.PatientContact;
 import com.example.demo.entity.userEntity.CommonAddress;
 import com.example.demo.entity.userEntity.CommonTelecom;
-import com.example.demo.repository.CommonAddressRepository;
-import com.example.demo.repository.CommonTelecomRepository;
-import com.example.demo.repository.Patient.ContactAddressRepository;
-import com.example.demo.repository.Patient.ContactTelecomRepository;
-import com.example.demo.repository.Patient.PatientContactRepository;
-import com.example.demo.repository.Patient.PatientRepository;
+import com.example.demo.repository.AuthCommon.CommonAddressRepository;
+import com.example.demo.repository.AuthCommon.CommonTelecomRepository;
+import com.example.demo.patientContact.repository.ContactAddressRepository;
+import com.example.demo.patientContact.repository.ContactTelecomRepository;
+import com.example.demo.patientContact.repository.PatientContactRepository;
+import com.example.demo.profile.repository.PatientRepository;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Patient.ContactComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +100,7 @@ public class PatientFhirBuilderService {
             if (contact.getRelationshipType() != null) {
                 CodeableConcept relationship = new CodeableConcept();
                 Coding coding = relationship.addCoding();
-                coding.setSystem("http://terminology.hl7.org/CodeSystem/v2-0131");
+                coding.setSystem("http://terminology.hl7.org/6.5.0/ValueSet-v3-PersonalRelationshipRoleType.html");
                 coding.setCode(contact.getRelationshipType());
                 coding.setDisplay(contact.getRelationshipType());
                 fhirContact.setRelationship(Collections.singletonList(relationship));

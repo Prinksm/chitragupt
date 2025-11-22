@@ -1,4 +1,4 @@
-package com.example.demo.Security;
+package com.example.demo.security;
 
 import com.example.demo.dto.LogInResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;

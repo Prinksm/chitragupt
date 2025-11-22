@@ -1,6 +1,5 @@
-package com.example.demo.repository.Patient;
+package com.example.demo.patientContact.repository;
 
-import com.example.demo.entity.patientEntity.Patient;
 import com.example.demo.entity.patientEntity.PatientContact;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +10,7 @@ import java.util.Optional;
 
 public interface PatientContactRepository extends JpaRepository<PatientContact, Long> {
     List<PatientContact> findAllByPatientId(long id);
-    List<PatientContact> findAllByPatient(Patient patient);
+    Optional<PatientContact> findByPatientId(Long id);
     @Query(nativeQuery = true, value = "SELECT * FROM patient.patient_contact WHERE patient_id = :patient_id")
     List<PatientContact> findByPatient_Id(@Param("patient_id") Long patient_id);
 }

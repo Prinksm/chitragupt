@@ -1,10 +1,10 @@
 package com.example.demo.controller;
 
-import com.example.demo.Security.AuthService;
-import com.example.demo.Security.AuthUtil;
+import com.example.demo.security.AuthService;
+import com.example.demo.security.AuthUtil;
 import com.example.demo.dto.*;
 import com.example.demo.entity.userEntity.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.AuthCommon.UserRepository;
 import com.example.demo.services.OtpService;
 import com.example.demo.services.PasswordResetService;
 import jakarta.servlet.http.HttpServletResponse;
