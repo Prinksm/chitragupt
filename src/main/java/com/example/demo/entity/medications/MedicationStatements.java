@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -49,7 +51,7 @@ public class MedicationStatements{
 
     @Column(name = "notes", length = 500)
     private String notes;
-
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "fhir_json", columnDefinition = "JSONB")
     private String fhirJson;
 }
