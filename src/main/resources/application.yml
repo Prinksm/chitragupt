@@ -1,0 +1,45 @@
+
+server:
+  port: 8089
+spring:
+  application:
+    name : phr
+  config:
+    import:
+        env : DATABASE_CONFIG
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE _USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  security.oauth2.client:
+    registration:
+      google:
+        client-id: ${GOOGLE_CLIENT_ID}
+        client-secret: ${GOOGLE_CLIENT_SECRET}
+  flyway:
+    enabled: true
+    locations: classpath:db/migrations
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: notification.chitragupt@gmail.com
+    password: ${EMAIL_PASS}
+    protocol: smtp
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: true
+      mail.smtp.starttls.enable: false
+      mail.smtp.starttls.required: false
+      mail.smtp.ssl.trust: smtp.gmail.com
+  logging:
+    level:
+      org.flywaydb: DEBUG
+jwt:
+  secretKey : ${SECRET_KEY}
+  accessTokenValidity : 600
+  refreshTokenValidity : 3600

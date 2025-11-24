@@ -1,0 +1,91 @@
+//Observations
+CREATE SEQUENCE IF NOT EXISTS observations_id_seq START WITH 1;
+CREATE TABLE IF NOT EXISTS  diagnosis.observations (
+    observation_id BIGINT PRIMARY KEY DEFAULT nextval('observations_id_seq'),
+    patient_id INT NOT NULL,
+    observation_concept_id INT NOT NULL,
+    effective_date DATETIME,
+    status VARCHAR(50) NOT NULL,
+    interpretation_id INT,
+    body_site_id INT,
+    performer_id INT,
+    notes TEXT,
+    fhir_json JSONB,
+    FOREIGN KEY (patient_id) REFERENCES patient.patients(patient_id),
+    FOREIGN KEY (observation_concept_id) REFERENCES codeable_concept.concepts(concept_id),
+    FOREIGN KEY (interpretation_id) REFERENCES codeable_concept.concepts(concept_id),
+    FOREIGN KEY (body_site_id) REFERENCES codeable_concept.concepts(concept_id)
+);
+
+
+CREATE TABLE IF NOT EXISTS  diagnosis.observation_categories_mapping (
+    observation_id INT NOT NULL,
+    category_concept_id INT NOT NULL,
+    PRIMARY KEY (observation_id, category_concept_id),
+    FOREIGN KEY (observation_id) REFERENCES diagnosis.observations(observation_id),
+    FOREIGN KEY (category_concept_id) REFERENCES codeable_concept.concepts(concept_id)
+);
+
+CREATE TABLE IF NOT EXISTS  observation_results (
+    result_id INT PRIMARY KEY,
+    observation_id INT NOT NULL,
+    value_type VARCHAR(50) NOT NULL,
+    value_quantity_value DECIMAL(18, 4),
+    value_quantity_unit_id INT,
+    value_concept_id INT,
+    value_string VARCHAR(255),
+    value_boolean Boolean,
+    FOREIGN KEY (observation_id) REFERENCES observations(observation_id),
+    FOREIGN KEY (value_quantity_unit_id) REFERENCES concepts(concept_id),
+    FOREIGN KEY (value_concept_id) REFERENCES concepts(concept_id)
+);
+CREATE TABLE IF NOT EXISTS  observation_components (
+    component_id INT PRIMARY KEY,
+    observation_id INT NOT NULL,
+    concept_id INT NOT NULL,
+    value_quantity_value DECIMAL(18, 4),
+    value_quantity_unit_id INT,
+    FOREIGN KEY (observation_id) REFERENCES observations(observation_id),
+    FOREIGN KEY (concept_id) REFERENCES concepts(concept_id),
+    FOREIGN KEY (value_quantity_unit_id) REFERENCES concepts(concept_id)
+);
+CREATE TABLE IF NOT EXISTS  diagnostic_reports (
+    report_id INT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    report_type_concept_id INT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    issued_datetime DATETIME NOT NULL,
+    conclusion TEXT,
+    fhirjson JSONB,
+    FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
+    FOREIGN KEY (report_type_concept_id) REFERENCES concepts(concept_id)
+);
+CREATE TABLE IF NOT EXISTS  report_observations (
+    report_id INT NOT NULL,
+    observation_id INT NOT NULL,
+    PRIMARY KEY (report_id, observation_id),
+    FOREIGN KEY (report_id) REFERENCES diagnostic_reports(report_id),
+    FOREIGN KEY (observation_id) REFERENCES observations(observation_id)
+);
+CREATE TABLE IF NOT EXISTS  reference_ranges (
+    reference_range_id INT PRIMARY KEY,
+    low_value DECIMAL(18, 4),
+    high_value DECIMAL(18, 4),
+    unit_id INT,
+    type_concept_id INT,
+    meaning_concept_id INT,
+    age_min_days INT,
+    age_max_days INT,
+    gender VARCHAR(10),
+    text TEXT,
+    FOREIGN KEY (unit_id) REFERENCES concepts(concept_id),
+    FOREIGN KEY (type_concept_id) REFERENCES concepts(concept_id),
+    FOREIGN KEY (meaning_concept_id) REFERENCES concepts(concept_id)
+);
+CREATE TABLE IF NOT EXISTS  observation_concept_reference_ranges (
+    observation_concept_id INT NOT NULL,
+    reference_range_id INT NOT NULL,
+    PRIMARY KEY (observation_concept_id, reference_range_id),
+    FOREIGN KEY (observation_concept_id) REFERENCES concepts(concept_id),
+    FOREIGN KEY (reference_range_id) REFERENCES reference_ranges(reference_range_id)
+);
