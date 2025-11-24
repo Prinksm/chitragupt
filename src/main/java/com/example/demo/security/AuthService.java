@@ -1,4 +1,4 @@
-package com.example.demo.Security;
+package com.example.demo.security;
 
 import com.example.demo.dto.LogInRequestDto;
 import com.example.demo.dto.LogInResponseDto;
@@ -8,7 +8,9 @@ import com.example.demo.entity.patientEntity.Patient;
 import com.example.demo.entity.userEntity.AuthProviderType;
 import com.example.demo.entity.userEntity.Roles;
 import com.example.demo.entity.userEntity.User;
-import com.example.demo.repository.*;
+import com.example.demo.repository.AuthCommon.RolesRepository;
+import com.example.demo.repository.AuthCommon.UserRepository;
+import com.example.demo.profile.repository.PatientRepository;
 import com.example.demo.services.EmailService;
 import com.example.demo.services.OtpService;
 import jakarta.servlet.http.HttpServletResponse;

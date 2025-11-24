@@ -1,6 +1,7 @@
 package com.example.demo.entity.patientEntity;
 
 import com.example.demo.entity.userEntity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -11,9 +12,16 @@ import java.util.Set;
 
 @Entity
 @Table(name = "patient", schema = "patient")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {
+        "patientContacts",
+        "patientAddresses",
+        "patientTelecoms",
+        "patientAllergies"
+})
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patient_id_seq")
@@ -21,8 +29,8 @@ public class Patient {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true) // This specifies the shared column name in the DB
-    @MapsId // This tells Hibernate to use the primary key of the 'user' association for this entity's ID
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @MapsId
     private User user;
 
     @Column(name = "firstname", nullable = false, length = 30)
@@ -56,12 +64,15 @@ public class Patient {
     @Column(name = "fhir")
     private String fhir;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PatientContact> patientContacts;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PatientAddress> patientAddresses;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PatientTelecom> patientTelecoms;
 

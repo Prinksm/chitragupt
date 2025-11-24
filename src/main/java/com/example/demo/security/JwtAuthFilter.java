@@ -1,7 +1,7 @@
-package com.example.demo.Security;
+package com.example.demo.security;
 
 import com.example.demo.entity.userEntity.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.AuthCommon.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,6 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             log.info("incoming request: {}", request.getRequestURI());
 
             final String requestTokenHeader = request.getHeader("Authorization");
+            System.out.println(requestTokenHeader);
             if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer")) {
                 filterChain.doFilter(request, response);
                 return;

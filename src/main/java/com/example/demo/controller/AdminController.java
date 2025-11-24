@@ -1,11 +1,10 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.LogInResponseDto;
 import com.example.demo.dto.UpdateRoleDto;
 import com.example.demo.entity.userEntity.Roles;
 import com.example.demo.entity.userEntity.User;
-import com.example.demo.repository.RolesRepository;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.AuthCommon.RolesRepository;
+import com.example.demo.repository.AuthCommon.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

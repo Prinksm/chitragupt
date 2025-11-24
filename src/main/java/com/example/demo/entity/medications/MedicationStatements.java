@@ -5,9 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -42,14 +45,14 @@ public class MedicationStatements{
 
 
     @Column(name = "effective_start_date")
-    private LocalDateTime effectiveStartDate;
+    private Date effectiveStartDate;
 
     @Column(name = "effective_end_date")
-    private LocalDateTime effectiveEndDate;
+    private Date effectiveEndDate;
 
     @Column(name = "notes", length = 500)
     private String notes;
-
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "fhir_json", columnDefinition = "JSONB")
     private String fhirJson;
 }

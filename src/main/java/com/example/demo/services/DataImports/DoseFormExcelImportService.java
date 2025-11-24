@@ -39,34 +39,50 @@ public class DoseFormExcelImportService {
                 String code = decimalFormat.format(numericValue);
 
                 String display = row.getCell(2).getStringCellValue().trim();
+                String description = row.getCell(3).getStringCellValue().trim();
                 System.out.println(systemUrl);
                 System.out.println(code);
                 System.out.println(display);
                 CodeSystem system = codeSystemRepo.findBySystemName(systemUrl)
                         .orElseGet(() -> {
+
                             CodeSystem newSystem = new CodeSystem();
                             newSystem.setSystemName(systemUrl);
                             return codeSystemRepo.save(newSystem);
                         });
 
-                Concepts concept = new Concepts();
-                concept.setConceptName(display);
-                concept.setDescription(display);
-                concept.setType("Dose Form");
-                concept = conceptRepo.save(concept);
 
-                ConceptCodeMapper mapping = new ConceptCodeMapper();
-                mapping.setCode(code);
-                mapping.setSystemId(system.getSystemId());
-                mapping.setConceptId(concept.getConceptId());
-                mapping.setDisplayText(concept.getConceptName());
+                Concepts concept = conceptRepo.findByConceptNameAndType(description, "Dose Form")
+                        .orElseGet(() -> {
 
-                conceptCodeMapperRepo.save(mapping);
+                            Concepts newConcept = new Concepts();
+                            newConcept.setConceptName(description);
+                            newConcept.setDescription(display);
+                            newConcept.setType("Dose Form");
+                            return conceptRepo.save(newConcept);
+                        });
 
-                DoseForms doseForm = new DoseForms();
-                System.out.println("Concept:"+concept.getConceptId());
-                doseForm.setConceptId(concept.getConceptId());
-                doseFormRepo.save(doseForm);
+
+                ConceptCodeMapper existingMapping = conceptCodeMapperRepo.findByCode(code)
+                        .orElseGet(() -> {
+
+                            ConceptCodeMapper newMapping = new ConceptCodeMapper();
+                            newMapping.setCode(code);
+                            newMapping.setSystemId(system.getSystemId());
+                            newMapping.setConceptId(concept.getConceptId());
+                            newMapping.setDisplayText(concept.getConceptName());
+                            return conceptCodeMapperRepo.save(newMapping);
+                        });
+
+
+                DoseForms existingDoseForm = doseFormRepo.findByConceptId(concept.getConceptId())
+                        .orElseGet(() -> {
+                            DoseForms newDoseForm = new DoseForms();
+                            newDoseForm.setConceptId(concept.getConceptId());
+                            return doseFormRepo.save(newDoseForm);
+                        });
+
+                System.out.println("Concept ID: " + concept.getConceptId());
             }
         }
     }
