@@ -97,7 +97,7 @@ public class MedicationStatementBuilderService {
                 .getStatus();
 
         MedicationStatement.MedicationStatementStatus statusEnum =
-                MedicationStatement.MedicationStatementStatus.fromCode(dbStatus.toLowerCase());
+                MedicationStatement.MedicationStatementStatus.fromCode(dbStatus);
         ms.setStatus(statusEnum);
 
 
