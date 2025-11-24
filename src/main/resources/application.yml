@@ -1,0 +1,24 @@
+
+server:
+  port: 8089
+spring:
+  application:
+    name : phr
+  config:
+    import:
+        env : DATABASE_CONFIG
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE _USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migrations
+  logging:
+    level:
+      org.flywaydb: DEBUG
