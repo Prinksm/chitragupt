@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/patient/prescriptions")
@@ -18,17 +19,22 @@ public class HealthDataController {
     @Autowired
     private HealthDataService healthDataServicee;
 
-    @PostMapping("/add-prescription")
-    public ResponseEntity<?> createPrescription(@RequestBody PrescriptionDto request,
-                                                @AuthenticationPrincipal User user) {
+    @PostMapping("/add-prescriptions")
+    public ResponseEntity<Map<String, String>> createPrescriptions(@RequestBody List<PrescriptionDto> prescriptions,
+                                                                                 @AuthenticationPrincipal User user) {
 
         Long userId = user.getId();
-        request.setPatientId(userId);
-        System.out.println("userId" + userId);
+        prescriptions.forEach(p -> p.setPatientId(userId));
+        for (PrescriptionDto prescription : prescriptions) {
+            System.out.println(prescription);
+//            healthDataServicee.savePrescription(prescription);
+        }
 
-        healthDataServicee.savePrescription(request);
-        return ResponseEntity.ok("Prescription saved successfully");
+        Map<String, String> response = Map.of("message", "All prescriptions saved successfully");
+        return ResponseEntity.ok(response);
+
     }
+
     @GetMapping("/prescription")
     public ResponseEntity<List<PrescriptionDto>> getPrescription(@AuthenticationPrincipal User user) {
 
