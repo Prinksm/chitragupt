@@ -24,12 +24,13 @@ public class Prescription {
     )
     @Column(name = "prescription_id")
     private Long prescriptionId;
-    @Column(name = "patient_id",nullable = false)
-    private Long patientId;
-    @Column(name = "reason_id",nullable = false)
-    private Long reasonId ;
+
+    @Column(name = "super_prescription_id", nullable = false)
+    private Long superPrescriptionId;
+
+    @Column(name = "reason_id", nullable = false)
+    private Long reasonId;
 
     @Column(name = "notes")
-    private String  notes;
-
+    private String notes;
 }
