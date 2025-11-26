@@ -1,3 +1,4 @@
+// src/main/java/com/example/demo/patientAllergy/PatientAllergyController.java
 package com.example.demo.patientAllergy;
 
 import com.example.demo.entity.userEntity.User;
@@ -9,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,17 +24,33 @@ public class PatientAllergyController {
         return ResponseEntity.status(201).body(response);
     }
 
+    @PostMapping("/no")
+    public ResponseEntity<Void> markNoAllergy(@AuthenticationPrincipal User user){
+        allergyService.markNoAllergy(user.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<Map<String, Object>> getAllergyStatus(@AuthenticationPrincipal User user){
+        boolean answered = allergyService.getAllergyAnsweredStatus(user.getId());
+        List<PatientAllergyResponseDto> allergies = allergyService.getAllergy(user.getId());
+        // you can return both answered flag and existing allergies if you want
+        return ResponseEntity.ok(Map.of(
+                "hasAnswered", answered,
+                "hasAllergies", !allergies.isEmpty(),
+                "allergies", allergies
+        ));
+    }
+
     @GetMapping
-    public ResponseEntity<List<PatientAllergyResponseDto>>getAllergy(@AuthenticationPrincipal User user){
+    public ResponseEntity<List<PatientAllergyResponseDto>> getAllergy(@AuthenticationPrincipal User user){
         List<PatientAllergyResponseDto> response = allergyService.getAllergy(user.getId());
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/delete/{allergyId}")
-    public ResponseEntity<Void>deleteAllergy(@AuthenticationPrincipal User user, @PathVariable Long allergyId){
+    public ResponseEntity<Void> deleteAllergy(@AuthenticationPrincipal User user, @PathVariable Long allergyId){
         allergyService.deleteAllergy(user.getId(), allergyId);
         return ResponseEntity.noContent().build();
     }
-
-
 }

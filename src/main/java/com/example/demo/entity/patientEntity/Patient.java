@@ -51,6 +51,9 @@ public class Patient {
     @Column(name = "maritalstatus", length = 30)
     private String maritalStatus;
 
+    @Column(name = "allergy_answered")
+    private Boolean allergyAnswered = false;
+
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 

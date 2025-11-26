@@ -173,8 +173,21 @@ public class ProfileService {
         try {
             Patient patient = patientRepository.findById(patientId)
                     .orElseThrow(() -> new RuntimeException("Patient not found with id: " + patientId));
-            ConvertToDto todto = new ConvertToDto();
-            return todto.convertToDto(patient);
+
+            boolean hasBasicInfo =
+                    patient.getBirthDate() != null &&
+                            patient.getGender() != null &&
+                            patient.getMaritalStatus() != null;
+
+            boolean hasAddress = patient.getPatientAddresses() != null && !patient.getPatientAddresses().isEmpty();
+            boolean hasTelecom = patient.getPatientTelecoms() != null && !patient.getPatientTelecoms().isEmpty();
+
+            if (!hasBasicInfo || !hasAddress || !hasTelecom) {
+                return null;
+            }
+
+            ConvertToDto toDto = new ConvertToDto();
+            return toDto.convertToDto(patient);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get patient profile: " + e.getMessage(), e);
         }

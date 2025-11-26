@@ -28,6 +28,11 @@ public class PatientAllergyService {
         Patient patient = patientRepo.findById(patientId)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + patientId));
 
+
+        patient.setAllergyAnswered(true);
+        patientRepo.save(patient);
+
+
         long conceptId = allergyCodeService.getConditionID(dto.getAllergyName());
         PatientAllergy allergy = new PatientAllergy();
         allergy.setPatient(patient);
@@ -43,6 +48,17 @@ public class PatientAllergyService {
         return toResponseDto(saved, dto.getAllergyName());
 
     }
+
+
+    @Transactional
+    public void markNoAllergy(Long patientId){
+        Patient patient = patientRepo.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + patientId));
+
+        patient.setAllergyAnswered(true);
+        patientRepo.save(patient);
+    }
+
 
     @Transactional
     public void deleteAllergy(Long patientId, Long allergyId){
@@ -62,6 +78,12 @@ public class PatientAllergyService {
         return list.stream()
                 .map(a -> toResponseDto(a, null))
                 .collect(Collectors.toList());
+    }
+
+    public boolean getAllergyAnsweredStatus(Long patientId) {
+        Patient patient = patientRepo.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + patientId));
+        return Boolean.TRUE.equals(patient.getAllergyAnswered());
     }
 
     private PatientAllergyResponseDto toResponseDto(PatientAllergy entity, String allergyNameFromRequest) {

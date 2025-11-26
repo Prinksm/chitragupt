@@ -85,7 +85,7 @@ public class AuthController {
         return ResponseEntity.ok(needsPassword);
     }
 
-    @GetMapping("refresh")
+    @GetMapping("/refresh")
     public ResponseEntity<?> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken,
                                           HttpServletResponse response) throws Exception {
         if (refreshToken == null || !authUtil.validateToken(refreshToken)) {
