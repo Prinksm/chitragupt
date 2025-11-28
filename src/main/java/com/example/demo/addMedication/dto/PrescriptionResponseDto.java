@@ -9,8 +9,9 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class PrescriptionDto {
+public class PrescriptionResponseDto {
+    private Long prescriptionId;
     private String conditionName;
     private String notes;
-    private List<MedicationStatementDto> medications;
+    private List<MedicationResponseDto> medications;
 }
