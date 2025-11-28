@@ -216,7 +216,7 @@ public class PatientContactService {
     private PatientContactDto mapPatientContactToDto(PatientContact patientContact) {
         PatientContactDto dto = new PatientContactDto();
         dto.setId(patientContact.getId());
-        dto.setPatientId(patientContact.getId());
+        dto.setPatientId(patientContact.getPatient().getId());
         dto.setFirstName(patientContact.getFirstName());
         dto.setMiddleName(patientContact.getMiddleName());
         dto.setLastName(patientContact.getLastName());
