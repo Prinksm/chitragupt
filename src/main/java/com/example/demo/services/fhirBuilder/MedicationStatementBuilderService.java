@@ -2,10 +2,7 @@ package com.example.demo.services.fhirBuilder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import com.example.demo.addMedication.repo.DosageRepo;
-import com.example.demo.addMedication.repo.MedicationStatementRepo;
-import com.example.demo.addMedication.repo.PrescriptionRepo;
-import com.example.demo.addMedication.repo.TimingRepo;
+import com.example.demo.addMedication.repo.*;
 import com.example.demo.entity.codeableConcept.CodeSystem;
 import com.example.demo.entity.codeableConcept.ConceptCodeMapper;
 import com.example.demo.entity.codeableConcept.Concepts;
@@ -38,6 +35,8 @@ public class MedicationStatementBuilderService {
     @Autowired
     TimingRepo timingRepo;
     @Autowired
+    SuperPrescriptionRepo superPrescriptionRepo;
+    @Autowired
     MedicationStatementRepo medicationStatementRepo;
 
     @Autowired
@@ -66,9 +65,10 @@ public class MedicationStatementBuilderService {
 
         Prescription prescription = prescriptionRepo.findById(medStatement.getPrescriptionId())
                 .orElseThrow(() -> new RuntimeException("Prescription does not exists"));
-
+        SuperPrescription superPrescription = superPrescriptionRepo.findById(prescription.getSuperPrescriptionId())
+                .orElseThrow(()->new RuntimeException("Super Prescription does not exists"));
         //Set patient Id
-        ms.setSubject(new Reference("Patient/" + prescription.getPatientId()));
+        ms.setSubject(new Reference("Patient/" + superPrescription.getPatientId()));
 
         //Set the reason Code
         ConceptCodeMapper reasonCodeMap = conceptCodeMapperRepo.findByConceptId(prescription.getReasonId())

@@ -22,7 +22,7 @@ public class FhirJsonBuilderTask  {
     @Autowired
     private MedicationStatementBuilderService medicationStatementBuilderService;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    @Scheduled(cron = "* 0 11 * * * ")
+    @Scheduled(initialDelay = 5000)
     public void medicationExecute() {
 
             medicationFhirBuilderService.MedicationFhirAdd();

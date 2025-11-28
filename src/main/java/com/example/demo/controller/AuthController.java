@@ -107,7 +107,7 @@ public class AuthController {
             ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(false)
                     .path("/")
-                    .maxAge(60)
+                    .maxAge(Duration.ofMinutes(20))
                     .build();
 
             return ResponseEntity.ok()
