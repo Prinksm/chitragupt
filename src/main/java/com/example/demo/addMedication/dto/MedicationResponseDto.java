@@ -11,6 +11,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class MedicationResponseDto {
+    private Long statementId;
     private String medication;
     private String status; // e.g., "ACTIVE"
     private Date effectiveStartDate;

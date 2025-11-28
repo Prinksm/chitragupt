@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface SuperPrescriptionRepo extends JpaRepository<SuperPrescription,Long> {
     List<SuperPrescription> findByPatientId(Long patientId);
+    boolean existsByPatientId(Long patientId);
 }

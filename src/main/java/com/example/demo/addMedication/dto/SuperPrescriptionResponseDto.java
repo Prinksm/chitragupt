@@ -13,6 +13,7 @@ import java.util.List;
 
 
 public class SuperPrescriptionResponseDto {
+    private Long superPrescriptionId;
     private Long patientId;
     private String doctorName;
     private Date prescriptionDate;

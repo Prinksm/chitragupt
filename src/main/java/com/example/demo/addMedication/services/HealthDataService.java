@@ -114,6 +114,7 @@ public class HealthDataService {
         List<SuperPrescription> superPrescriptions = superPrescriptionRepo.findByPatientId(patientId);
         return superPrescriptions.stream().map(superPrescription -> {
             SuperPrescriptionResponseDto spdto = new SuperPrescriptionResponseDto();
+            spdto.setSuperPrescriptionId(superPrescription.getSuperPrescriptionId());
             spdto.setPatientId(superPrescription.getPatientId());
             spdto.setDoctorName(superPrescription.getDoctorName());
             spdto.setNotes(superPrescription.getNotes());
@@ -126,6 +127,7 @@ public class HealthDataService {
                 PrescriptionResponseDto pdto = new PrescriptionResponseDto();
 
                 pdto.setNotes(prescription.getNotes());
+                pdto.setPrescriptionId(prescription.getPrescriptionId());
 //            // Convert conditionId → condition name
                 Concepts condition = conceptRepo.findById(prescription.getReasonId())
                         .orElse(null);
@@ -136,6 +138,7 @@ public class HealthDataService {
                 List<MedicationResponseDto> medicationDTOs = statements.stream().map(ms -> {
 
                     MedicationResponseDto msDto = new MedicationResponseDto();
+                    msDto.setStatementId(ms.getStatementId());
                     Medications medicine = medicationsRepo.findById(ms.getMedicationId())
                             .orElse(null);
                     msDto.setMedication(medicine != null ? medicine.getBrandName() : null);
