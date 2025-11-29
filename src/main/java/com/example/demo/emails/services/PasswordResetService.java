@@ -1,4 +1,4 @@
-package com.example.demo.services;
+package com.example.demo.emails.services;
 
 import com.example.demo.entity.userEntity.PasswordResetToken;
 import com.example.demo.entity.userEntity.User;

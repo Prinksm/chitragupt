@@ -4,18 +4,18 @@ import com.example.demo.addMedication.dto.AmountCodeDto;
 import com.example.demo.addMedication.dto.MedicineDto;
 import com.example.demo.addMedication.dto.RouteDto;
 import com.example.demo.addMedication.services.AutoCompleteService;
+import com.example.demo.emails.dto.MedicationReminderRequest;
+import com.example.demo.emails.services.MedicationReminderService;
 import org.hl7.fhir.r4.model.Medication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/patient/medication")
@@ -24,6 +24,24 @@ public class MedicineLookupController {
     //medicines get
     @Autowired
     AutoCompleteService autoCompleteService;
+    @Autowired
+    private MedicationReminderService reminderService;
+
+
+    @PostMapping("/send-reminder")
+    public ResponseEntity<Map<String, String>>  sendReminder(@RequestBody MedicationReminderRequest req) {
+
+        reminderService.sendReminder(
+                req.getSuperPrescriptionId(),
+                req.getMedicationName(),
+                req.getDoseTime(),
+                req.getReminderType()
+        );
+
+        Map<String, String> response = Map.of("message", "Reminder Sent Successfully");
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/medicine-search")
     public List<MedicineDto> medicineSearch(@RequestParam String q) {
         System.out.println("Request data"+ q);

@@ -1,5 +1,6 @@
-package com.example.demo.services;
+package com.example.demo.emails.services;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -7,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
-    @Autowired
     private JavaMailSender mailSender;
 
     public EmailService(JavaMailSender mailSender) {
@@ -33,4 +33,24 @@ public class EmailService {
         String body = "Your OTP is: " + otp + ". It will expire in 5 minutes.";
         sendEmail(to , subject , body);
     }
+
+    public void sendMedicationReminder(String toEmail, String medName, String doseTime, int reminderType) {
+
+        String subject = (reminderType == 1)
+                ? "Medication Reminder"
+                : "Second Reminder – Medication Not Taken";
+
+        String body;
+
+        if (reminderType == 1) {
+            body = "This is a reminder to take your medication: " + medName +
+                    " at " + doseTime + ".";
+        } else {
+            body = "You still haven't taken your medication: " + medName +
+                    ".\nPlease take it as soon as possible.";
+        }
+
+        sendEmail(toEmail, subject, body);
+    }
+
 }
