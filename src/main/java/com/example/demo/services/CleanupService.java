@@ -1,11 +1,14 @@
 package com.example.demo.services;
 
+import com.example.demo.entity.patientEntity.Patient;
 import com.example.demo.entity.userEntity.Otp;
 import com.example.demo.entity.userEntity.PasswordResetToken;
 import com.example.demo.entity.userEntity.User;
+import com.example.demo.profile.repository.PatientRepository;
 import com.example.demo.repository.AuthCommon.OtpRepository;
 import com.example.demo.repository.AuthCommon.PasswordResetTokenRepository;
 import com.example.demo.repository.AuthCommon.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -19,8 +22,7 @@ public class CleanupService {
     private final OtpRepository otpRepository;
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
-
-
+    private final PatientRepository patientRepository;
 
     @Scheduled(fixedRate = 360000) // Run every 6 minutes
     public void cleanupExpiredOtps() {
@@ -41,5 +43,14 @@ public class CleanupService {
         LocalDateTime now = LocalDateTime.now();
         List<PasswordResetToken> expiredTokens = passwordResetTokenRepository.findByExpiryDateBefore(now);
         passwordResetTokenRepository.deleteAll(expiredTokens);
+    }
+
+    @Scheduled(fixedRate = 660000)
+    public void deletePatientsWithMissingUser() {
+        List<Patient> patients = patientRepository.findPatientsWithNoUser();
+        if (patients.isEmpty()) {
+            return;
+        }
+        patientRepository.deleteAll(patients);
     }
 }
