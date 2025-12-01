@@ -37,6 +37,20 @@ public class HealthDataController {
         return ResponseEntity.ok(response);
 
     }
+    @PutMapping("/update-prescriptions/{superPrescriptionId}")
+    public ResponseEntity<Map<String, String>> updatePrescriptions(
+            @PathVariable Long superPrescriptionId,
+            @RequestBody SuperPrescriptionResponseDto prescription,
+            @AuthenticationPrincipal User user) {
+
+        Long userId = user.getId();
+        prescription.setPatientId(userId);
+        System.out.println("Updating prescription: " + prescription);
+        healthDataService.updatePrescription(superPrescriptionId, prescription);
+
+        Map<String, String> response = Map.of("message", "Prescription updated successfully");
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/prescription")
     public ResponseEntity<List<SuperPrescriptionResponseDto>> getSuperPrescription(@AuthenticationPrincipal User user) {

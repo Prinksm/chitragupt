@@ -109,6 +109,97 @@ public class HealthDataService {
             }
         }
     }
+    @Transactional
+    public void updatePrescription(Long superPrescriptionId, SuperPrescriptionResponseDto request) {
+        // 1️⃣ Fetch existing SuperPrescription
+        SuperPrescription superPrescription = superPrescriptionRepo.findById(superPrescriptionId)
+                .orElseThrow(() -> new RuntimeException("SuperPrescription not found"));
+
+        // Update fields
+        superPrescription.setPrescriptionDate(request.getPrescriptionDate());
+        superPrescription.setDoctorName(request.getDoctorName());
+        superPrescription.setUpdatedAt(LocalDateTime.now());
+        superPrescription.setNotes(request.getNotes());
+        superPrescription.setPatientId(request.getPatientId());
+
+        superPrescriptionRepo.save(superPrescription);
+
+        // 2️⃣ Update child Prescriptions
+        for (PrescriptionResponseDto presReq : request.getPrescriptions()) {
+            Prescription prescription;
+            if (presReq.getPrescriptionId() != null) {
+                // Update existing prescription
+                prescription = prescriptionRepo.findById(presReq.getPrescriptionId())
+                        .orElseThrow(() -> new RuntimeException("Prescription not found"));
+            } else {
+                // New prescription
+                prescription = new Prescription();
+                prescription.setSuperPrescriptionId(superPrescription.getSuperPrescriptionId());
+            }
+
+            prescription.setReasonId(getConditionID(presReq.getConditionName()));
+            prescription.setNotes(presReq.getNotes());
+            prescription = prescriptionRepo.save(prescription);
+
+            // 3️⃣ Update / Save MedicationStatements
+            for (MedicationResponseDto msReq : presReq.getMedications()) {
+
+                // Timing
+                Timing timing = null;
+                if (msReq.getTiming() != null) {
+                    TimingResponseDto t = msReq.getTiming();
+                    if (t.getTimingId() != null) {
+                        timing = timingRepo.findById(t.getTimingId())
+                                .orElse(new Timing());
+                    } else {
+                        timing = new Timing();
+                    }
+                    timing.setFrequency(t.getFrequency());
+                    timing.setPeriod(t.getPeriod());
+                    timing.setPeriodUnitId(getConceptId(t.getPeriodUnit(), "Units"));
+                    if (t.getTimeOfDay() != null)
+                        timing.setTimeOfDay(Time.valueOf(t.getTimeOfDay().toLocalTime()));
+                    timing.setWhenCodeId(getConceptId(t.getWhenCode(), "When-Timing"));
+                    timing = timingRepo.save(timing);
+                }
+
+                // Dosage
+                Dosages dosage = null;
+                if (msReq.getDosage() != null) {
+                    DosageResponseDto d = msReq.getDosage();
+                    if (d.getDosageId() != null) {
+                        dosage = dosageRepo.findById(d.getDosageId()).orElse(new Dosages());
+                    } else {
+                        dosage = new Dosages();
+                    }
+                    dosage.setAmount(d.getAmount());
+                    dosage.setAmountUnitId(d.getAmountUnitId());
+                    dosage.setRouteId(d.getRouteId());
+                    dosage.setInstruction(d.getInstruction());
+                    if (timing != null) dosage.setTimingId(timing.getTimingId());
+                    dosage = dosageRepo.save(dosage);
+                }
+
+                // MedicationStatement
+                MedicationStatements ms;
+                if (msReq.getStatementId() != null) {
+                    ms = medicationStatementRepo.findById(msReq.getStatementId())
+                            .orElse(new MedicationStatements());
+                } else {
+                    ms = new MedicationStatements();
+                    ms.setPrescriptionId(prescription.getPrescriptionId());
+                }
+
+                ms.setMedicationId(msReq.getMedicationId());
+                ms.setEffectiveStartDate(msReq.getEffectiveStartDate());
+                ms.setEffectiveEndDate(msReq.getEffectiveEndDate());
+                ms.setDosageId(dosage != null ? dosage.getDosageId() : null);
+                ms.setStatus(msReq.getStatus());
+
+                medicationStatementRepo.save(ms);
+            }
+        }
+    }
 
     public List<SuperPrescriptionResponseDto> getSuperPrescriptionByPatient(Long patientId) {
         List<SuperPrescription> superPrescriptions = superPrescriptionRepo.findByPatientId(patientId);
@@ -132,6 +223,7 @@ public class HealthDataService {
                 Concepts condition = conceptRepo.findById(prescription.getReasonId())
                         .orElse(null);
                 pdto.setConditionName(condition != null ? condition.getConceptName() : null);
+//                pdto.setConditionId(condition != null ? condition.getConceptId() : null);
                 List<MedicationStatements> statements =
                         medicationStatementRepo.findByPrescriptionId(prescription.getPrescriptionId());
 
@@ -142,6 +234,7 @@ public class HealthDataService {
                     Medications medicine = medicationsRepo.findById(ms.getMedicationId())
                             .orElse(null);
                     msDto.setMedication(medicine != null ? medicine.getBrandName() : null);
+                    msDto.setMedicationId(medicine != null ? medicine.getMedicationId() : null);
 
                     msDto.setStatus(ms.getStatus());
                     msDto.setEffectiveStartDate(ms.getEffectiveStartDate());
@@ -153,12 +246,15 @@ public class HealthDataService {
                         if (d != null) {
                             DosageResponseDto dosageDto = new DosageResponseDto();
                             dosageDto.setAmount(d.getAmount());
+                            dosageDto.setDosageId(d.getDosageId());
                             Concepts amount = conceptRepo.findById(d.getAmountUnitId())
                                     .orElse(null);
-                            dosageDto.setAmountUnitId(condition != null ? amount.getConceptName() : null);
+                            dosageDto.setAmountUnit(amount != null ? amount.getConceptName() : null);
+                            dosageDto.setAmountUnitId(amount != null ? amount.getConceptId() : null);
                             Concepts route = conceptRepo.findById(d.getRouteId())
                                     .orElse(null);
-                            dosageDto.setRouteId(condition != null ?route.getConceptName() : null);
+                            dosageDto.setRoute(route != null ?route.getConceptName() : null);
+                            dosageDto.setRouteId(route != null ?route.getConceptId() : null);
 
                             dosageDto.setInstruction(d.getInstruction());
                             msDto.setDosage(dosageDto);
@@ -171,7 +267,8 @@ public class HealthDataService {
                         if (d != null && d.getTimingId() != null) {
                             Timing t = timingRepo.findById(d.getTimingId()).orElse(null);
                             if (t != null) {
-                                TimingDto timingDto = new TimingDto();
+                                TimingResponseDto timingDto = new TimingResponseDto();
+                                timingDto.setTimingId(t.getTimingId());
                                 timingDto.setFrequency(t.getFrequency());
                                 timingDto.setPeriod(t.getPeriod());
 

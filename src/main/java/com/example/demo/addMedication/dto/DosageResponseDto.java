@@ -9,9 +9,12 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class DosageResponseDto {
+    private Long dosageId;
     private BigDecimal amount;
-    private String amountUnitId;//get concept id
-    private String routeId;//get concept id
+    private String amountUnit;//get concept id
+    private Long amountUnitId;
+    private String route;//get concept id
+    private Long routeId;
     private String instruction;
 
 }
