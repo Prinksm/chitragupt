@@ -12,6 +12,7 @@ import java.util.List;
 public class PrescriptionResponseDto {
     private Long prescriptionId;
     private String conditionName;
+//    private Long conditionId;
     private String notes;
     private List<MedicationResponseDto> medications;
 }

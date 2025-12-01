@@ -13,10 +13,11 @@ import java.util.Date;
 public class MedicationResponseDto {
     private Long statementId;
     private String medication;
+    private Long medicationId;
     private String status; // e.g., "ACTIVE"
     private Date effectiveStartDate;
     private Date effectiveEndDate;
     private String notes;
     private DosageResponseDto dosage;
-    private TimingDto timing;
+    private TimingResponseDto timing;
 }
