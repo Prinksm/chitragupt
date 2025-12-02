@@ -195,6 +195,7 @@ public class HealthDataService {
                 ms.setEffectiveEndDate(msReq.getEffectiveEndDate());
                 ms.setDosageId(dosage != null ? dosage.getDosageId() : null);
                 ms.setStatus(msReq.getStatus());
+                ms.setFhirJson(null);
 
                 medicationStatementRepo.save(ms);
             }

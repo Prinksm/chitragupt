@@ -43,6 +43,8 @@ public class MedicationStatementBuilderService {
     MedicationFhirBuilderService medFhirService;
 
     @Autowired
+    MedicationFhirBuilderService medicationFhirBuilderService;
+    @Autowired
     PrescriptionRepo prescriptionRepo;
     private final FhirContext fhirContext = FhirContext.forR4();
     @Transactional
@@ -83,7 +85,13 @@ public class MedicationStatementBuilderService {
         //Contained data of the medication
         Medications med =  medicationsRepo.findById(medStatement.getMedicationId())
                 .orElseThrow(() -> new RuntimeException("Medication does not exists"));
-        String medicationJson = med.getFhirJson();
+        String medicationJson= med.getFhirJson();
+
+        if (medicationJson== null) {
+            medicationFhirBuilderService.MedicationFhirAdd();
+            medicationJson = med.getFhirJson();
+        }
+
         IParser parser = fhirContext.newJsonParser();
 
         Medication medication = parser.parseResource(Medication.class, medicationJson);
@@ -97,7 +105,7 @@ public class MedicationStatementBuilderService {
                 .getStatus();
 
         MedicationStatement.MedicationStatementStatus statusEnum =
-                MedicationStatement.MedicationStatementStatus.fromCode(dbStatus);
+                MedicationStatement.MedicationStatementStatus.fromCode(dbStatus.toLowerCase());
         ms.setStatus(statusEnum);
 
 
