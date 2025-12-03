@@ -1,5 +1,6 @@
 package com.example.demo.emails.services;
 
+import com.example.demo.emails.template.EmailTemplates;
 import com.example.demo.entity.userEntity.PasswordResetToken;
 import com.example.demo.entity.userEntity.User;
 import com.example.demo.repository.AuthCommon.PasswordResetTokenRepository;
@@ -18,6 +19,7 @@ public class PasswordResetService {
     private final UserRepository userRepository;
     private  final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final EmailTemplates emailTemplates;
 
     public void sendPasswordResetLink(String email) {
         User user = userRepository.findByEmail(email)
@@ -31,7 +33,7 @@ public class PasswordResetService {
         passwordResetTokenRepository.save(resetToken);
 
         String resetLink = "http://localhost:4200/reset-password?token=" + token;
-        emailService.sendResetLink(email, resetLink);
+        emailTemplates.sendResetLink(email, resetLink);
     }
 
 

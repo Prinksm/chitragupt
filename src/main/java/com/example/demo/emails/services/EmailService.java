@@ -33,35 +33,5 @@ public class EmailService {
         }
     }
 
-    public void sendResetLink(String toEmail, String resetLink) {
-        String subject = "Password Reset Link";
-        String body = "Click the link to reset your password: " + resetLink;
-        sendEmail(toEmail, subject, body);
-    }
-
-    public void sendOtpEmail(String to, String otp) {
-        String subject = "Your OTP for Verification";
-        String body = "Your OTP is: " + otp + ". It will expire in 5 minutes.";
-        sendEmail(to , subject , body);
-    }
-
-    public void sendMedicationReminder(String toEmail, String medName, String doseTime, int reminderType) {
-
-        String subject = (reminderType == 1)
-                ? "Medication Reminder"
-                : "Second Reminder – Medication Not Taken";
-
-        String body;
-
-        if (reminderType == 1) {
-            body = "This is a reminder to take your medication: " + medName +
-                    " at " + doseTime + ".";
-        } else {
-            body = "You still haven't taken your medication: " + medName +
-                    ".\nPlease take it as soon as possible.";
-        }
-
-        sendEmail(toEmail, subject, body);
-    }
 
 }
