@@ -1,4 +1,5 @@
 package com.example.demo.patientContact;
+import com.example.demo.emails.template.EmailTemplates;
 import com.example.demo.patientContact.dto.ContactAddressDto;
 import com.example.demo.patientContact.dto.ContactTelecomDto;
 import com.example.demo.patientContact.dto.PatientContactDto;
@@ -30,6 +31,22 @@ public class PatientContactService {
     private final PatientRepository patientRepository;
     private final ContactTelecomRepository contactTelecomRepository;
     private final ContactAddressRepository contactAddressRepository;
+    private  final EmailTemplates emailTemplates;
+
+
+    private String extractPrimaryEmail(PatientContactDto dto) {
+        if (dto.getContactTelecoms() == null || dto.getContactTelecoms().isEmpty()) {
+            return null;
+        }
+
+        ContactTelecomDto firstTelecom = dto.getContactTelecoms().get(0);
+
+        if (firstTelecom.getSystem() != null && firstTelecom.getSystem().equalsIgnoreCase("email")) {
+            return firstTelecom.getValue();
+        }
+
+        return null; // Invalid ordering or no email found
+    }
 
 
     //add
@@ -118,6 +135,18 @@ public class PatientContactService {
         patientContactDto.setId(patientContact.getId());
         patientContactDto.setContactTelecoms(savedTelecomDTOs);
         patientContactDto.setContactAddresses(savedAddressDTOs);
+        try {
+            String contactEmail = extractPrimaryEmail(patientContactDto);
+
+            if (contactEmail != null) {
+                String patientName = patientContact.getPatient().getFirstName() ;
+
+                emailTemplates.sendEmergencyContactNotification(contactEmail, patientName);
+            }
+        } catch (Exception ex) {
+            System.out.println("Failed to send emergency contact email: " + ex.getMessage());
+        }
+
 
         return patientContactDto;
     }
