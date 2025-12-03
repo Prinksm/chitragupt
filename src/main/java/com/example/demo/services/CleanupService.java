@@ -45,12 +45,9 @@ public class CleanupService {
         passwordResetTokenRepository.deleteAll(expiredTokens);
     }
 
-    @Scheduled(fixedRate = 660000)
+    @Scheduled(fixedRate = 600000)
     public void deletePatientsWithMissingUser() {
-        List<Patient> patients = patientRepository.findPatientsWithNoUser();
-        if (patients.isEmpty()) {
-            return;
-        }
-        patientRepository.deleteAll(patients);
+        patientRepository.deletePatientsWithNoUser();
     }
+
 }

@@ -160,6 +160,7 @@ public class ProfileService {
                 }
             }
         }
+        patient.setFhir(null);
         patient = patientRepository.save(patient);
 
         ConvertToDto todto = new ConvertToDto();

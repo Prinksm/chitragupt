@@ -160,7 +160,8 @@ public class PatientContactService {
                     commonTelecom.setValue(telecomDTO.getValue());
                 }
 
-                commonTelecomRepository.save(commonTelecom);
+                patientContact.getContactTelecoms().add(contactTelecom);
+
             }
         }
 
@@ -205,9 +206,12 @@ public class PatientContactService {
                     commonAddress.setCountry(addressDTO.getCountry());
                 }
 
-                commonAddressRepository.save(commonAddress);
+                patientContact.getContactAddresses().add(contactAddress);
+
             }
         }
+        patientContact.getPatient().setFhir(null);
+        patientContactRepository.save(patientContact);
 
         return mapPatientContactToDto(patientContact);
     }
