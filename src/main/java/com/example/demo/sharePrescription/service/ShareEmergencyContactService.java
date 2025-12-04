@@ -32,9 +32,9 @@ public class ShareEmergencyContactService {
                     dto.setMiddleName(patient.getMiddleName());
                     dto.setLastName(patient.getLastName());
 
-                    dto.setPrescriptions(
-                            healthDataService.getSuperPrescriptionByPatient(patient.getId())
-                    );
+//                    dto.setPrescriptions(
+//                            healthDataService.getSuperPrescriptionByPatient(patient.getId())
+//                    );
 
                     return dto;
                 })
