@@ -160,7 +160,7 @@ public class ProfileService {
                 }
             }
         }
-        patient.setFhir(null);
+
         patient = patientRepository.save(patient);
 
         ConvertToDto todto = new ConvertToDto();
@@ -196,6 +196,7 @@ public class ProfileService {
 
     @Transactional
     public void deletePatientTelecom(Long patientId, Long telecomId) {
+
         PatientTelecom telecomToDelete = patientTelecomRepository.findByIdAndPatientId(telecomId, patientId)
                 .orElseThrow(() -> new RuntimeException("Telecom not found with id: " + telecomId +
                         " for patient: " + patientId));

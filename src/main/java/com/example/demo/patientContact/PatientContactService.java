@@ -210,7 +210,7 @@ public class PatientContactService {
 
             }
         }
-        patientContact.getPatient().setFhir(null);
+
         patientContactRepository.save(patientContact);
 
         return mapPatientContactToDto(patientContact);

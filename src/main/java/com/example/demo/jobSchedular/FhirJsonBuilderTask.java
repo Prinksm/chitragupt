@@ -36,17 +36,17 @@ public class FhirJsonBuilderTask  {
     }
 
 
-    @Scheduled(cron = "* 0 10 * * * ")
-    public void executePatientFhirBuilder() {
-        if (!isRunning.get()) {
-            isRunning.set(true);
-            try {
-                patientFhirBuilderService.buildPatientFhirJson();
-            } finally {
-                isRunning.set(false);
-            }
-        }
-    }
+//    @Scheduled(cron = "* 0 10 * * * ")
+//    public void executePatientFhirBuilder() {
+//        if (!isRunning.get()) {
+//            isRunning.set(true);
+//            try {
+//                patientFhirBuilderService.buildPatientFhirJson();
+//            } finally {
+//                isRunning.set(false);
+//            }
+//        }
+//    }
 //    @Scheduled(cron = "0 12 * * *") // Cron expression for running  at 12:00 every day
 //    public void medicationStatement() {
 //        medicationFhirBuilderService.MedicationFhirAdd();
