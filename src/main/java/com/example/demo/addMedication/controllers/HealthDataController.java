@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/patient/prescriptions")
@@ -64,6 +65,25 @@ public class HealthDataController {
         // Return the list as the response body
         return ResponseEntity.ok(prescriptions);
     }
+    @GetMapping("/prescription/{id}")
+    public ResponseEntity<SuperPrescriptionResponseDto> getSuperPrescriptionById(
+            @PathVariable("id") Long prescriptionId,
+            @AuthenticationPrincipal User user) {
+
+        Long userId = user.getId();
+        System.out.println("userId: " + userId + ", prescriptionId: " + prescriptionId);
+
+        // Retrieve prescription by id and check if it belongs to the user
+        Optional<SuperPrescriptionResponseDto> prescriptionOpt =
+                healthDataService.getSuperPrescriptionById(prescriptionId);
+
+        if (prescriptionOpt.isPresent()) {
+            return ResponseEntity.ok(prescriptionOpt.get());
+        } else {
+            return ResponseEntity.notFound().build(); // 404 if not found or doesn't belong to user
+        }
+    }
+
 
     //Checks the prescription exists
     @GetMapping("/exists")

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HealthDataService {
@@ -315,4 +316,98 @@ public class HealthDataService {
         return concept.getConceptId();
     }
 
+    public Optional<SuperPrescriptionResponseDto> getSuperPrescriptionById(Long superPrescriptionId) {
+        SuperPrescription superPrescription = superPrescriptionRepo.findById(superPrescriptionId)
+                .orElseThrow(() -> new RuntimeException("SuperPrescription not found"));
+        SuperPrescriptionResponseDto spdto = new SuperPrescriptionResponseDto();
+        spdto.setSuperPrescriptionId(superPrescription.getSuperPrescriptionId());
+        spdto.setPatientId(superPrescription.getPatientId());
+        spdto.setDoctorName(superPrescription.getDoctorName());
+        spdto.setNotes(superPrescription.getNotes());
+        spdto.setPrescriptionDate(superPrescription.getPrescriptionDate());
+
+        //Prescription Dto
+        List<Prescription> prescriptions = prescriptionRepo.findBySuperPrescriptionId(superPrescription.getSuperPrescriptionId());
+
+        List<PrescriptionResponseDto> prescriptionDTOs = prescriptions.stream().map(prescription -> {
+            PrescriptionResponseDto pdto = new PrescriptionResponseDto();
+
+            pdto.setNotes(prescription.getNotes());
+            pdto.setPrescriptionId(prescription.getPrescriptionId());
+//            // Convert conditionId → condition name
+            Concepts condition = conceptRepo.findById(prescription.getReasonId())
+                    .orElse(null);
+            pdto.setConditionName(condition != null ? condition.getConceptName() : null);
+//                pdto.setConditionId(condition != null ? condition.getConceptId() : null);
+            List<MedicationStatements> statements =
+                    medicationStatementRepo.findByPrescriptionId(prescription.getPrescriptionId());
+
+            List<MedicationResponseDto> medicationDTOs = statements.stream().map(ms -> {
+
+                MedicationResponseDto msDto = new MedicationResponseDto();
+                msDto.setStatementId(ms.getStatementId());
+                Medications medicine = medicationsRepo.findById(ms.getMedicationId())
+                        .orElse(null);
+                msDto.setMedication(medicine != null ? medicine.getBrandName() : null);
+                msDto.setMedicationId(medicine != null ? medicine.getMedicationId() : null);
+
+                msDto.setStatus(ms.getStatus());
+                msDto.setEffectiveStartDate(ms.getEffectiveStartDate());
+                msDto.setEffectiveEndDate(ms.getEffectiveEndDate());
+
+                // Fetch dosage
+                if (ms.getDosageId() != null) {
+                    Dosages d = dosageRepo.findById(ms.getDosageId()).orElse(null);
+                    if (d != null) {
+                        DosageResponseDto dosageDto = new DosageResponseDto();
+                        dosageDto.setAmount(d.getAmount());
+                        dosageDto.setDosageId(d.getDosageId());
+                        Concepts amount = conceptRepo.findById(d.getAmountUnitId())
+                                .orElse(null);
+                        dosageDto.setAmountUnit(amount != null ? amount.getConceptName() : null);
+                        dosageDto.setAmountUnitId(amount != null ? amount.getConceptId() : null);
+                        Concepts route = conceptRepo.findById(d.getRouteId())
+                                .orElse(null);
+                        dosageDto.setRoute(route != null ?route.getConceptName() : null);
+                        dosageDto.setRouteId(route != null ?route.getConceptId() : null);
+
+                        dosageDto.setInstruction(d.getInstruction());
+                        msDto.setDosage(dosageDto);
+                    }
+                }
+
+                // Fetch timing
+                if (ms.getDosageId() != null) {
+                    Dosages d = dosageRepo.findById(ms.getDosageId()).orElse(null);
+                    if (d != null && d.getTimingId() != null) {
+                        Timing t = timingRepo.findById(d.getTimingId()).orElse(null);
+                        if (t != null) {
+                            TimingResponseDto timingDto = new TimingResponseDto();
+                            timingDto.setTimingId(t.getTimingId());
+                            timingDto.setFrequency(t.getFrequency());
+                            timingDto.setPeriod(t.getPeriod());
+
+                            Concepts pu = conceptRepo.findById(t.getPeriodUnitId()).orElse(null);
+                            timingDto.setPeriodUnit(pu != null ? pu.getConceptName() : null);
+
+                            timingDto.setTimeOfDay(t.getTimeOfDay());
+
+                            Concepts when = conceptRepo.findById(t.getWhenCodeId()).orElse(null);
+                            timingDto.setWhenCode(when != null ? when.getConceptName() : null);
+
+                            msDto.setTiming(timingDto);
+                        }
+                    }
+                }
+
+                return msDto;
+            }).toList();
+
+            pdto.setMedications(medicationDTOs);
+
+            return pdto;
+        }).toList();
+        spdto.setPrescriptions(prescriptionDTOs);
+        return Optional.of(spdto);
+    }
 }
