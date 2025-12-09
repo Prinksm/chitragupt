@@ -1,6 +1,7 @@
 // src/main/java/com/example/demo/patientAllergy/PatientAllergyController.java
 package com.example.demo.patientAllergy;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.example.demo.entity.userEntity.User;
 import com.example.demo.patientAllergy.dto.PatientAllergyRequestDto;
 import com.example.demo.patientAllergy.dto.PatientAllergyResponseDto;
@@ -53,4 +54,28 @@ public class PatientAllergyController {
         allergyService.deleteAllergy(user.getId(), allergyId);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/update/{allergyId}")
+    public ResponseEntity<PatientAllergyResponseDto> updateAllergy(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long allergyId,
+            @RequestBody PatientAllergyRequestDto dto
+    ) {
+        var response = allergyService.updateAllergy(user.getId(), allergyId, dto);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{allergyId}")
+    public ResponseEntity<PatientAllergyResponseDto> getOne(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long allergyId
+    ){
+        List<PatientAllergyResponseDto> list = allergyService.getAllergy(user.getId());
+
+        return ResponseEntity.ok(
+                list.stream().filter(a -> a.getId().equals(allergyId)).findFirst()
+                        .orElseThrow(() -> new ResourceNotFoundException("Allergy not found"))
+        );
+    }
+
 }

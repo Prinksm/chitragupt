@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface ContactAddressRepository extends JpaRepository<ContactAddress, Long> {
     List<ContactAddress> findByContactId(Long contactId);
+    long countByAddressId(Long addressId);
 }
 

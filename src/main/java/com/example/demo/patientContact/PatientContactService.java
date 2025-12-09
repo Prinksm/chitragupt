@@ -69,6 +69,7 @@ public class PatientContactService {
         List<ContactTelecomDto> savedTelecomDTOs = new ArrayList<>();
         List<ContactAddressDto> savedAddressDTOs = new ArrayList<>();
 
+
         List<ContactTelecomDto> telecomDTOs = patientContactDto.getContactTelecoms();
         if (telecomDTOs != null) {
             for (ContactTelecomDto telecomDTO : telecomDTOs) {
@@ -158,6 +159,43 @@ public class PatientContactService {
         PatientContact patientContact = patientContactRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("PatientContact not found with id: " + id));
 
+        String oldEmail = patientContact.getContactTelecoms().stream()
+                .filter(t -> t.getTelecom().getSystem().equalsIgnoreCase("email"))
+                .map(t -> t.getTelecom().getValue())
+                .findFirst()
+                .orElse(null);
+        if (patientContactDto.getRemovedTelecomIds() != null) {
+            for (Long telId : patientContactDto.getRemovedTelecomIds()) {
+                // remove association from patientContact if present
+                patientContact.getContactTelecoms().removeIf(ct -> telId.equals(ct.getId()));
+                // delete from repo (this will remove the row)
+                contactTelecomRepository.findById(telId).ifPresent(ct -> {
+                    contactTelecomRepository.delete(ct);
+                    // optionally delete the commonTelecom row if it's orphaned
+                    CommonTelecom ctTele = ct.getTelecom();
+                    if (ctTele != null) {
+                        // you can add a check to see if any other ContactTelecom refers to it
+                        long refs = contactTelecomRepository.countByTelecomId(ctTele.getId());
+                        if (refs == 0) commonTelecomRepository.delete(ctTele);
+                    }
+                });
+            }
+        }
+
+        // 2) Delete removed addresses (if provided)
+        if (patientContactDto.getRemovedAddressIds() != null) {
+            for (Long addrId : patientContactDto.getRemovedAddressIds()) {
+                patientContact.getContactAddresses().removeIf(ca -> addrId.equals(ca.getId()));
+                contactAddressRepository.findById(addrId).ifPresent(ca -> {
+                    contactAddressRepository.delete(ca);
+                    CommonAddress caddr = ca.getAddress();
+                    if (caddr != null) {
+                        long refs = contactAddressRepository.countByAddressId(caddr.getId());
+                        if (refs == 0) commonAddressRepository.delete(caddr);
+                    }
+                });
+            }
+        }
         if (patientContactDto.getFirstName() != null) {
             patientContact.setFirstName(patientContactDto.getFirstName());
         }
@@ -174,73 +212,111 @@ public class PatientContactService {
 
 
         List<ContactTelecomDto> telecomDTOs = patientContactDto.getContactTelecoms();
-        if (telecomDTOs != null && !telecomDTOs.isEmpty()) {
+        if (telecomDTOs != null) {
+
             for (ContactTelecomDto telecomDTO : telecomDTOs) {
-                ContactTelecom contactTelecom = contactTelecomRepository.findById(telecomDTO.getId())
-                        .orElseThrow(() -> new RuntimeException("ContactTelecom not found with id: " + telecomDTO.getId()));
 
-                CommonTelecom commonTelecom = commonTelecomRepository.findById(contactTelecom.getTelecom().getId())
-                        .orElseThrow(() -> new RuntimeException("CommonTelecom not found"));
+                // CASE 1: Update existing telecom
+                if (telecomDTO.getId() != null) {
 
-                if (telecomDTO.getSystem() != null) {
-                    commonTelecom.setSystem(telecomDTO.getSystem());
+                    ContactTelecom contactTelecom = contactTelecomRepository.findById(telecomDTO.getId())
+                            .orElseThrow(() -> new RuntimeException("ContactTelecom not found: " + telecomDTO.getId()));
+
+                    CommonTelecom commonTelecom = contactTelecom.getTelecom();
+
+                    if (telecomDTO.getSystem() != null) commonTelecom.setSystem(telecomDTO.getSystem());
+                    if (telecomDTO.getValue() != null) commonTelecom.setValue(telecomDTO.getValue());
+
+                    patientContact.getContactTelecoms().add(contactTelecom);
+
                 }
-                if (telecomDTO.getValue() != null) {
-                    commonTelecom.setValue(telecomDTO.getValue());
+                // CASE 2: Add new telecom
+                else {
+
+                    CommonTelecom newTelecom = new CommonTelecom();
+                    newTelecom.setSystem(telecomDTO.getSystem());
+                    newTelecom.setValue(telecomDTO.getValue());
+                    newTelecom = commonTelecomRepository.save(newTelecom);
+
+                    ContactTelecom contactTelecom = new ContactTelecom();
+                    contactTelecom.setTelecom(newTelecom);
+                    contactTelecom.setContact(patientContact);
+
+                    contactTelecomRepository.save(contactTelecom);
+                    patientContact.getContactTelecoms().add(contactTelecom);
                 }
-
-                patientContact.getContactTelecoms().add(contactTelecom);
-
             }
         }
 
         List<ContactAddressDto> addressDTOs = patientContactDto.getContactAddresses();
-        if (addressDTOs != null && !addressDTOs.isEmpty()) {
+        if (addressDTOs != null) {
+
             for (ContactAddressDto addressDTO : addressDTOs) {
-                ContactAddress contactAddress = contactAddressRepository.findById(addressDTO.getId())
-                        .orElseThrow(() -> new RuntimeException("ContactAddress not found with id: " + addressDTO.getId()));
 
-                CommonAddress commonAddress = commonAddressRepository.findById(contactAddress.getAddress().getId())
-                        .orElseThrow(() -> new RuntimeException("CommonAddress not found"));
+                // CASE 1: Update existing address
+                if (addressDTO.getId() != null) {
 
+                    ContactAddress contactAddress = contactAddressRepository.findById(addressDTO.getId())
+                            .orElseThrow(() -> new RuntimeException("ContactAddress not found: " + addressDTO.getId()));
 
-                if (addressDTO.getUseCode() != null) {
-                    commonAddress.setUseCode(addressDTO.getUseCode());
-                }
-                if (addressDTO.getAddressType() != null) {
-                    commonAddress.setAddressType(addressDTO.getAddressType());
-                }
-                if (addressDTO.getText() != null) {
-                    commonAddress.setText(addressDTO.getText());
-                }
-                if (addressDTO.getLine1() != null) {
-                    commonAddress.setLine1(addressDTO.getLine1());
-                }
-                if (addressDTO.getLine2() != null) {
-                    commonAddress.setLine2(addressDTO.getLine2());
-                }
-                if (addressDTO.getCity() != null) {
-                    commonAddress.setCity(addressDTO.getCity());
-                }
-                if (addressDTO.getDistrict() != null) {
-                    commonAddress.setDistrict(addressDTO.getDistrict());
-                }
-                if (addressDTO.getState() != null) {
-                    commonAddress.setState(addressDTO.getState());
-                }
-                if (addressDTO.getPostalCode() != null) {
-                    commonAddress.setPostalCode(addressDTO.getPostalCode());
-                }
-                if (addressDTO.getCountry() != null) {
-                    commonAddress.setCountry(addressDTO.getCountry());
-                }
+                    CommonAddress addr = contactAddress.getAddress();
 
-                patientContact.getContactAddresses().add(contactAddress);
+                    if (addressDTO.getUseCode() != null) addr.setUseCode(addressDTO.getUseCode());
+                    if (addressDTO.getAddressType() != null) addr.setAddressType(addressDTO.getAddressType());
+                    if (addressDTO.getText() != null) addr.setText(addressDTO.getText());
+                    if (addressDTO.getLine1() != null) addr.setLine1(addressDTO.getLine1());
+                    if (addressDTO.getLine2() != null) addr.setLine2(addressDTO.getLine2());
+                    if (addressDTO.getCity() != null) addr.setCity(addressDTO.getCity());
+                    if (addressDTO.getDistrict() != null) addr.setDistrict(addressDTO.getDistrict());
+                    if (addressDTO.getState() != null) addr.setState(addressDTO.getState());
+                    if (addressDTO.getPostalCode() != null) addr.setPostalCode(addressDTO.getPostalCode());
+                    if (addressDTO.getCountry() != null) addr.setCountry(addressDTO.getCountry());
 
+                    patientContact.getContactAddresses().add(contactAddress);
+
+                }
+                // CASE 2: Add new address
+                else {
+
+                    CommonAddress addr = new CommonAddress();
+                    addr.setUseCode(addressDTO.getUseCode());
+                    addr.setAddressType(addressDTO.getAddressType());
+                    addr.setText(addressDTO.getText());
+                    addr.setLine1(addressDTO.getLine1());
+                    addr.setLine2(addressDTO.getLine2());
+                    addr.setCity(addressDTO.getCity());
+                    addr.setDistrict(addressDTO.getDistrict());
+                    addr.setState(addressDTO.getState());
+                    addr.setPostalCode(addressDTO.getPostalCode());
+                    addr.setCountry(addressDTO.getCountry());
+
+                    addr = commonAddressRepository.save(addr);
+
+                    ContactAddress contactAddress = new ContactAddress();
+                    contactAddress.setAddress(addr);
+                    contactAddress.setContact(patientContact);
+
+                    contactAddressRepository.save(contactAddress);
+                    patientContact.getContactAddresses().add(contactAddress);
+                }
             }
         }
 
         patientContactRepository.save(patientContact);
+
+        String newEmail = extractPrimaryEmail(patientContactDto);
+
+        try {
+            boolean emailUpdated = (newEmail != null && !newEmail.equals(oldEmail));
+
+            if (emailUpdated) {
+                String patientName = patientContact.getPatient().getFirstName();
+                emailTemplates.sendEmergencyContactNotification(newEmail, patientName);
+            }
+
+        } catch (Exception ex) {
+            System.out.println("Failed to send emergency contact email: " + ex.getMessage());
+        }
 
         return mapPatientContactToDto(patientContact);
     }

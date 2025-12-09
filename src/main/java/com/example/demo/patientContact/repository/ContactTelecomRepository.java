@@ -15,4 +15,5 @@ public interface ContactTelecomRepository extends JpaRepository<ContactTelecom, 
                  WHERE LOWER(t.value) = LOWER(:email)
     """)
     List<ContactTelecom> findByEmail(String email);
+    long countByTelecomId(Long addressId);
 }

@@ -71,6 +71,36 @@ public class PatientAllergyService {
     }
 
 
+    @Transactional
+    public PatientAllergyResponseDto updateAllergy(Long patientId, Long allergyId, PatientAllergyRequestDto dto) {
+
+        PatientAllergy allergy = allergyRepo.findById(allergyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Allergy not found with id: " + allergyId));
+
+        if (!allergy.getPatient().getId().equals(patientId)) {
+            throw new IllegalArgumentException("Allergy does not belong to patient: " + patientId);
+        }
+
+        // Update allergy code if name changed
+        if (dto.getAllergyName() != null) {
+            long conceptId = allergyCodeService.getConditionID(dto.getAllergyName());
+            allergy.setAllergyCode(conceptId);
+        }
+
+        allergy.setClinicalStatus(dto.getClinicalStatus());
+        allergy.setVerificationStatus(dto.getVerificationStatus());
+        allergy.setAllergyType(dto.getAllergyType());
+        allergy.setCategory(dto.getCategory());
+        allergy.setCriticality(dto.getCriticality());
+        allergy.setOnsetDate(dto.getOnsetDate());
+
+        PatientAllergy saved = allergyRepo.save(allergy);
+
+        return toResponseDto(saved, dto.getAllergyName());
+    }
+
+
+
     public List<PatientAllergyResponseDto> getAllergy(Long patientId){
         Patient patient = patientRepo.findById(patientId)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + patientId));
