@@ -5,8 +5,8 @@ import com.example.demo.security.AuthUtil;
 import com.example.demo.dto.*;
 import com.example.demo.entity.userEntity.User;
 import com.example.demo.repository.AuthCommon.UserRepository;
-import com.example.demo.services.OtpService;
-import com.example.demo.services.PasswordResetService;
+import com.example.demo.emails.services.OtpService;
+import com.example.demo.emails.services.PasswordResetService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -85,7 +85,7 @@ public class AuthController {
         return ResponseEntity.ok(needsPassword);
     }
 
-    @GetMapping("refresh")
+    @GetMapping("/refresh")
     public ResponseEntity<?> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken,
                                           HttpServletResponse response) throws Exception {
         if (refreshToken == null || !authUtil.validateToken(refreshToken)) {
@@ -107,7 +107,7 @@ public class AuthController {
             ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(false)
                     .path("/")
-                    .maxAge(60)
+                    .maxAge(Duration.ofMinutes(20))
                     .build();
 
             return ResponseEntity.ok()

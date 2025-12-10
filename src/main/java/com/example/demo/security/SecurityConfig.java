@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,6 +29,10 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final HandlerExceptionResolver handlerExceptionResolver;
+    @Value("${frontendUrl}")
+    private String frontendUrl;
+    @Value("${baseUrl}")
+    private String baseUrl;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -39,7 +44,7 @@ public class SecurityConfig {
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/public/**", "/auth/**","/data-extractor/**").permitAll()
+                        .requestMatchers("/public/**", "/auth/**","/data-extractor/**","/images/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/patient/**").hasAnyRole("ADMIN" , "PATIENT" , "USER")
                         .anyRequest().authenticated()
@@ -64,7 +69,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:8089", "http://localhost:4200"));
+        configuration.setAllowedOrigins(List.of(baseUrl, frontendUrl));
         configuration.setAllowedMethods(List.of("GET","POST","PUT", "DELETE","OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization","Cache-Control","Content-Type"));
         configuration.setAllowCredentials(true);

@@ -410,7 +410,6 @@ private String parseStrengthText(String composition) {
     }
     return "";
 }
-
     private String[] splitStrength(String strengthStr) {
         String[] result = new String[2];
         result[0] = "0.0";       // default value

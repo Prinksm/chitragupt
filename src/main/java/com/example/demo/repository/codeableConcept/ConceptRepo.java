@@ -22,6 +22,6 @@ public interface ConceptRepo extends JpaRepository<Concepts, Long> {
     @Query("SELECT new com.example.demo.addMedication.dto.AmountCodeDto(c.conceptId, c.conceptName) " +
             "FROM Concepts c " +
             "WHERE c.type = 'Amount-Unit' " +
-            "AND LOWER(c.conceptName) LIKE LOWER(CONCAT(:name, '%'))")
+            "AND LOWER(c.conceptName) LIKE LOWER(CONCAT(:keyword, '%'))")
     List<AmountCodeDto> searchByAmountCodeName(String keyword);
 }

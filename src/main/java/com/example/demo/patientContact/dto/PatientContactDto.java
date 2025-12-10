@@ -12,8 +12,10 @@ public class PatientContactDto {
     private Long patientId;
     private String relationshipType;
     private String firstName;
-    private String MiddleName;
+    private String middleName;
     private String lastName;
     private List<ContactAddressDto> contactAddresses;
     private List<ContactTelecomDto> contactTelecoms;
+    private List<Long> removedTelecomIds;
+    private List<Long> removedAddressIds;
 }

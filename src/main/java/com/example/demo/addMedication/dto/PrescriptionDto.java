@@ -10,7 +10,6 @@ import java.util.List;
 @Getter
 @Setter
 public class PrescriptionDto {
-    private Long patientId;
     private String conditionName;
     private String notes;
     private List<MedicationStatementDto> medications;
