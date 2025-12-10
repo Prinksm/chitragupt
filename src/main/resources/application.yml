@@ -1,18 +1,17 @@
-
 server:
   port: 8089
 spring:
   profile:
-    active: ${ENV:dev}
+    active: prod
   servlet:
-      multipart:
-        max-file-size: 20MB
-        max-request-size: 20MB
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
   application:
-    name : phr
+    name: phr
   config:
     import:
-        env : DATABASE_CONFIG
+      env: DATABASE_CONFIG
   datasource:
     driver-class-name: org.postgresql.Driver
     url: ${SPRING_DATASOURCE_URL}
@@ -46,8 +45,8 @@ spring:
     level:
       org.flywaydb: DEBUG
 jwt:
-  secretKey : ${SECRET_KEY}
-  accessTokenValidity : 300
-  refreshTokenValidity : 1200
-frontendUrl : http://localhost:4200
+  secretKey: ${SECRET_KEY}
+  accessTokenValidity: 300
+  refreshTokenValidity: 1200
+frontendUrl: http://localhost:4200
 baseUrl: http://localhost:8089
