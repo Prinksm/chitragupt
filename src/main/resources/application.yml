@@ -2,6 +2,8 @@
 server:
   port: 8089
 spring:
+  profile:
+    active: ${ENV:dev}
   servlet:
       multipart:
         max-file-size: 20MB
@@ -45,5 +47,7 @@ spring:
       org.flywaydb: DEBUG
 jwt:
   secretKey : ${SECRET_KEY}
-  accessTokenValidity : 600
-  refreshTokenValidity : 3600
+  accessTokenValidity : 300
+  refreshTokenValidity : 1200
+frontendUrl : http://localhost:4200
+baseUrl: http://localhost:8089

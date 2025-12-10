@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -25,6 +26,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final AuthService authService;
     private final ObjectMapper objectMapper;
     private final AuthUtil authUtil;
+    @Value("${jwt.accessTokenValidity}")
+    private Long accessTokenValidity;
+    @Value("${jwt.refreshTokenValidity}")
+    private Long refreshTokenValidity;
+    @Value("${frontendUrl}")
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -38,18 +45,18 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String accessToken =loginResponse.getBody().getJwt();
         ResponseCookie cookie= ResponseCookie.from("accessToken",accessToken).httpOnly(false)
                 .path("/")
-                .maxAge(Duration.ofSeconds(300))
+                .maxAge(Duration.ofSeconds(accessTokenValidity))
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         String refreshToken = loginResponse.getBody().getRefreshToken();
         ResponseCookie refreshcookie = ResponseCookie.from("refreshToken",refreshToken).httpOnly(false)
                 .path("/")
-                .maxAge(Duration.ofSeconds(1200))
+                .maxAge(Duration.ofSeconds(refreshTokenValidity))
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshcookie.toString());
-        response.sendRedirect("http://localhost:4200/user");
+        response.sendRedirect(frontendUrl + "/user");
 //        response.setStatus(loginResponse.getStatusCode().value());
 //        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 //        response.getWriter().write(objectMapper.writeValueAsString(loginResponse.getBody()));

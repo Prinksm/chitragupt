@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class GlobalTemplate {
     @Autowired
 
-    private static final String LOGO_URL = "http://localhost:8089/images/img.png";
+//    private static final String LOGO_URL = "http://localhost:8089/images/img.png";
 
     public static String wrap(String contentHtml) {
         return """
