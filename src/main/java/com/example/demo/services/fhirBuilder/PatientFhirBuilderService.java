@@ -128,7 +128,7 @@ public class PatientFhirBuilderService {
                 telecom.ifPresent(t -> {
                     ContactPoint contactPoint = new ContactPoint();
                     if (t.getSystem() != null) {
-                        contactPoint.setSystem(ContactPoint.ContactPointSystem.fromCode(t.getSystem()));
+                        contactPoint.setSystem(ContactPoint.ContactPointSystem.fromCode(t.getSystem().toLowerCase()));
                     }
                     if (t.getValue() != null) {
                         contactPoint.setValue(t.getValue());
@@ -190,7 +190,7 @@ public class PatientFhirBuilderService {
         for (CommonTelecom telecom : telecoms) {
             ContactPoint contactPoint = new ContactPoint();
             if (telecom.getSystem() != null) {
-                contactPoint.setSystem(ContactPoint.ContactPointSystem.fromCode(telecom.getSystem()));
+                contactPoint.setSystem(ContactPoint.ContactPointSystem.fromCode(telecom.getSystem().toLowerCase()));
             }
             if (telecom.getValue() != null) {
                 contactPoint.setValue(telecom.getValue());

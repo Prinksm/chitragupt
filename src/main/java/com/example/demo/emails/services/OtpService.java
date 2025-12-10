@@ -1,5 +1,6 @@
-package com.example.demo.services;
+package com.example.demo.emails.services;
 
+import com.example.demo.emails.template.EmailTemplates;
 import com.example.demo.entity.userEntity.Otp;
 import com.example.demo.entity.userEntity.User;
 import com.example.demo.repository.AuthCommon.OtpRepository;
@@ -18,6 +19,7 @@ public class OtpService {
     private final OtpRepository otpRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final EmailTemplates emailTemplates;
 
     public void sendOtp(String email) {
         User user = userRepository.findByEmail(email)
@@ -38,7 +40,7 @@ public class OtpService {
         otpEntity=otpRepository.save(otpEntity);
 
 //        System.out.println("Otp to ban chuka h"+otpEntity);
-        emailService.sendOtpEmail(user.getEmail(), rawOtp);
+        emailTemplates.sendOtpEmail(user.getEmail(), rawOtp);
 //        System.out.println("Email bhej diya h");
     }
 

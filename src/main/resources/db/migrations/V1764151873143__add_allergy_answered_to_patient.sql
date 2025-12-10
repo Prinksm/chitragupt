@@ -1,0 +1,2 @@
+ALTER TABLE patient.patient
+ADD COLUMN IF NOT EXISTS allergy_answered BOOLEAN DEFAULT FALSE;

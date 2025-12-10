@@ -1,10 +1,12 @@
-package com.example.demo.services;
+package com.example.demo.emails.services;
 
+import com.example.demo.emails.template.EmailTemplates;
 import com.example.demo.entity.userEntity.PasswordResetToken;
 import com.example.demo.entity.userEntity.User;
 import com.example.demo.repository.AuthCommon.PasswordResetTokenRepository;
 import com.example.demo.repository.AuthCommon.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,9 @@ public class PasswordResetService {
     private final UserRepository userRepository;
     private  final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final EmailTemplates emailTemplates;
+    @Value("${frontendUrl}")
+    private String frontendUrl;
 
     public void sendPasswordResetLink(String email) {
         User user = userRepository.findByEmail(email)
@@ -30,8 +35,8 @@ public class PasswordResetService {
         resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(10));
         passwordResetTokenRepository.save(resetToken);
 
-        String resetLink = "http://localhost:4200/reset-password?token=" + token;
-        emailService.sendResetLink(email, resetLink);
+        String resetLink = frontendUrl + "/reset-password?token=" + token;;
+        emailTemplates.sendResetLink(email, resetLink);
     }
 
 

@@ -160,6 +160,7 @@ public class ProfileService {
                 }
             }
         }
+
         patient = patientRepository.save(patient);
 
         ConvertToDto todto = new ConvertToDto();
@@ -173,8 +174,21 @@ public class ProfileService {
         try {
             Patient patient = patientRepository.findById(patientId)
                     .orElseThrow(() -> new RuntimeException("Patient not found with id: " + patientId));
-            ConvertToDto todto = new ConvertToDto();
-            return todto.convertToDto(patient);
+
+            boolean hasBasicInfo =
+                    patient.getBirthDate() != null &&
+                            patient.getGender() != null &&
+                            patient.getMaritalStatus() != null;
+
+            boolean hasAddress = patient.getPatientAddresses() != null && !patient.getPatientAddresses().isEmpty();
+            boolean hasTelecom = patient.getPatientTelecoms() != null && !patient.getPatientTelecoms().isEmpty();
+
+            if (!hasBasicInfo || !hasAddress || !hasTelecom) {
+                return null;
+            }
+
+            ConvertToDto toDto = new ConvertToDto();
+            return toDto.convertToDto(patient);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get patient profile: " + e.getMessage(), e);
         }
@@ -182,6 +196,7 @@ public class ProfileService {
 
     @Transactional
     public void deletePatientTelecom(Long patientId, Long telecomId) {
+
         PatientTelecom telecomToDelete = patientTelecomRepository.findByIdAndPatientId(telecomId, patientId)
                 .orElseThrow(() -> new RuntimeException("Telecom not found with id: " + telecomId +
                         " for patient: " + patientId));

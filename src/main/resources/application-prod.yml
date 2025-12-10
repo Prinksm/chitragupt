@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_PROD_DATASOURCE_URL}
+    username: ${SPRING_PROD_DATASOURCE_USERNAME}
+    password: ${SPRING_PROD_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+frontendUrl : http://localhost:4200
+baseUrl: http://localhost:8089
+
+

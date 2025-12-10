@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/patient/profile")
@@ -19,10 +21,25 @@ public class ProfileController {
     }
 
     @GetMapping
-    public ResponseEntity<PatientDto> getPatientProfile( @AuthenticationPrincipal User user) {
-        PatientDto patientDto = profileService.getPatientProfile(user.getId());
-        return ResponseEntity.ok(patientDto);
+    public ResponseEntity<Map<String, Object>> getPatientProfile(@AuthenticationPrincipal User user) {
+        PatientDto dto = profileService.getPatientProfile(user.getId());
+
+        if (dto == null ||
+                dto.getAddresses() == null || dto.getAddresses().isEmpty() ||
+                dto.getTelecoms() == null || dto.getTelecoms().isEmpty()) {
+
+            return ResponseEntity.ok(Map.of(
+                    "hasProfile", false,
+                    "profile", null
+            ));
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "hasProfile", true,
+                "profile", dto
+        ));
     }
+
 
     @DeleteMapping("/telecoms/{telecomId}")
     public ResponseEntity<Void> deletePatientTelecom(@AuthenticationPrincipal User user, @PathVariable Long telecomId){
