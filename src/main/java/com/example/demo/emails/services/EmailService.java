@@ -4,6 +4,9 @@ package com.example.demo.emails.services;
 // import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 // import org.springframework.mail.SimpleMailMessage;
 // import org.springframework.mail.javamail.JavaMailSender;
 // // import org.springframework.mail.javamail.MimeMessageHelper;
