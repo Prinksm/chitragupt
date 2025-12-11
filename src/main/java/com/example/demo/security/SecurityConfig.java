@@ -65,20 +65,24 @@ public class SecurityConfig {
 
         return httpSecurity.build();
     }
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+ @Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of(baseUrl, frontendUrl));
-        configuration.setAllowedMethods(List.of("GET","POST","PUT", "DELETE","OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization","Cache-Control","Content-Type"));
-        configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("Set-Cookie"));
+    configuration.setAllowedOrigins(List.of(baseUrl, frontendUrl));
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    
+    configuration.addAllowedHeader("*");
 
-        source.registerCorsConfiguration("/**",configuration);
+    configuration.setAllowCredentials(true);
 
-        return source;
-    }
+    // Expose cookies if needed
+    configuration.setExposedHeaders(List.of("Set-Cookie"));
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+}
+
 }
