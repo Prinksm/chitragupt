@@ -43,7 +43,7 @@ public class AuthService {
     private final OtpService otpService;
     private final EmailService emailService;
 
-    public LogInResponseDto login(LogInRequestDto loginRequestDto , HttpServletResponse response) {
+    public LogInResponseDto login(LogInRequestDto loginRequestDto, HttpServletResponse response) {
         User user = userRepository.findByEmail(loginRequestDto.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
@@ -56,33 +56,39 @@ public class AuthService {
         }
 
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword()));
 
         User user1 = (User) authentication.getPrincipal();
 
         String token = authUtil.generateAccessToken(user1);
-        ResponseCookie cookie= ResponseCookie.from("accessToken",token).httpOnly(false)
+        ResponseCookie cookie = ResponseCookie.from("accessToken", token).httpOnly(false)
                 .path("/")
+                .secure(true)
+                .sameSite("None")
                 .maxAge(Duration.ofSeconds(300))
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         String refreshToken = authUtil.generateRefreshToken(user1);
-        ResponseCookie refreshcookie = ResponseCookie.from("refreshToken",refreshToken).httpOnly(false)
+        ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", refreshToken).httpOnly(false)
                 .path("/")
+                .secure(true)
+                .sameSite("None")
                 .maxAge(Duration.ofSeconds(1200))
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshcookie.toString());
 
-        return new LogInResponseDto(token, refreshToken,user1.getId());
+        return new LogInResponseDto(token, refreshToken, user1.getId());
     }
 
-    public User signUpInternal(SignUpRequestDto signupRequestDto, AuthProviderType authProviderType, String providerId){
+    public User signUpInternal(SignUpRequestDto signupRequestDto, AuthProviderType authProviderType,
+            String providerId) {
         User user = userRepository.findByEmail(signupRequestDto.getEmail()).orElse(null);
-        if(user != null) throw new IllegalArgumentException("User already exists");
-        if (signupRequestDto.getPassword()!=null && !signupRequestDto.getPassword().equals(signupRequestDto.getConfirmPassword())) {
+        if (user != null)
+            throw new IllegalArgumentException("User already exists");
+        if (signupRequestDto.getPassword() != null
+                && !signupRequestDto.getPassword().equals(signupRequestDto.getConfirmPassword())) {
             throw new RuntimeException("Passwords do not match");
         }
         User users = new User();
@@ -94,19 +100,21 @@ public class AuthService {
         users.setEmail(signupRequestDto.getEmail());
         users.setContactNumber(signupRequestDto.getContactNumber());
         users.setVerified(false);
-        if(authProviderType == AuthProviderType.EMAIL){
+        if (authProviderType == AuthProviderType.EMAIL) {
             users.setPassword(passwordEncoder.encode(signupRequestDto.getPassword()));
         }
 
         Set<Roles> roles = new HashSet<>();
-        Roles patientRole = rolesRepository.findByName("PATIENT").orElseThrow(()-> new RuntimeException("Patient role not found"));
+        Roles patientRole = rolesRepository.findByName("PATIENT")
+                .orElseThrow(() -> new RuntimeException("Patient role not found"));
         roles.add(patientRole);
 
-        Roles userRole = rolesRepository.findByName("USER").orElseThrow(()-> new RuntimeException("User role not found"));
+        Roles userRole = rolesRepository.findByName("USER")
+                .orElseThrow(() -> new RuntimeException("User role not found"));
         roles.add(userRole);
 
         users.setRoles(roles);
-        users =userRepository.save(users);
+        users = userRepository.save(users);
 
         Patient patient = new Patient();
         patient.setUser(users);
@@ -117,51 +125,55 @@ public class AuthService {
         return users;
     }
 
-
     public SignUpResponseDto signup(SignUpRequestDto signupRequestDto) {
         User user = signUpInternal(signupRequestDto, AuthProviderType.EMAIL, null);
         otpService.sendOtp(user.getEmail());
         return new SignUpResponseDto(user.getId(), user.getUsername());
     }
 
-
     @Transactional
-    public ResponseEntity<LogInResponseDto> handleOauth2LoginRequest(OAuth2User oAuth2User, String email, String registrationId , HttpServletResponse response) {
+    public ResponseEntity<LogInResponseDto> handleOauth2LoginRequest(OAuth2User oAuth2User, String email,
+            String registrationId, HttpServletResponse response) {
         AuthProviderType providerType = authUtil.getProviderTypeFromRegistrationID(registrationId);
-        String providerId = authUtil.determineProviderIdFromOAuth2User(oAuth2User , registrationId);
+        String providerId = authUtil.determineProviderIdFromOAuth2User(oAuth2User, registrationId);
         String email1 = oAuth2User.getAttribute("email");
 
-        User user = userRepository.findByProviderIdAndProviderType(providerId,providerType).orElse(null);
+        User user = userRepository.findByProviderIdAndProviderType(providerId, providerType).orElse(null);
         User emailUser = userRepository.findByEmail(email1).orElse(null);
 
-        if(user==null && emailUser == null){
-            String firstName = oAuth2User.getAttribute("given_name") != null ? oAuth2User.getAttribute("given_name") : oAuth2User.getAttribute("name");
-            //String emailAuth = authUtil.determineUsernameFromOAuth2User(oAuth2User , registrationId , providerId);
-          signUpInternal(new SignUpRequestDto(firstName,null,oAuth2User.getAttribute("family_name"),null , email1 , null , null ),providerType, providerId);
-            user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found after signup"));
+        if (user == null && emailUser == null) {
+            String firstName = oAuth2User.getAttribute("given_name") != null ? oAuth2User.getAttribute("given_name")
+                    : oAuth2User.getAttribute("name");
+            // String emailAuth = authUtil.determineUsernameFromOAuth2User(oAuth2User ,
+            // registrationId , providerId);
+            signUpInternal(new SignUpRequestDto(firstName, null, oAuth2User.getAttribute("family_name"), null, email1,
+                    null, null), providerType, providerId);
+            user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found after signup"));
             user.setProviderId(providerId);
             user.setVerified(true);
             user.setProviderType(providerType);
             userRepository.save(user);
             String token = authUtil.generateAccessToken(user);
             String refreshToken = authUtil.generateRefreshToken(user);
-            return ResponseEntity.ok(new LogInResponseDto(token,refreshToken, user.getId()));
+            return ResponseEntity.ok(new LogInResponseDto(token, refreshToken, user.getId()));
 
-        }else if(user != null) {
-            if(email != null && !email.isBlank() && !email.equals(user.getUsername())) {
+        } else if (user != null) {
+            if (email != null && !email.isBlank() && !email.equals(user.getUsername())) {
                 user.setEmail(email);
                 userRepository.save(user);
             }
             String token = authUtil.generateAccessToken(user);
             String refreshToken = authUtil.generateRefreshToken(user);
-            return ResponseEntity.ok(new LogInResponseDto(token, refreshToken,user.getId()));
+            return ResponseEntity.ok(new LogInResponseDto(token, refreshToken, user.getId()));
 
-        }else if (emailUser != null && emailUser.getPassword() != null && !emailUser.getPassword().isEmpty()) {
+        } else if (emailUser != null && emailUser.getPassword() != null && !emailUser.getPassword().isEmpty()) {
             String token = authUtil.generateAccessToken(emailUser);
             String refreshToken = authUtil.generateRefreshToken(emailUser);
-            return ResponseEntity.ok(new LogInResponseDto(token, refreshToken,emailUser.getId()));
+            return ResponseEntity.ok(new LogInResponseDto(token, refreshToken, emailUser.getId()));
         } else {
-            throw new BadCredentialsException("This email is already registered with provider "+emailUser.getProviderType());
+            throw new BadCredentialsException(
+                    "This email is already registered with provider " + emailUser.getProviderType());
         }
 
     }

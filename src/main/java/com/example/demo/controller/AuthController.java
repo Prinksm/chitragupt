@@ -28,10 +28,9 @@ public class AuthController {
     private final AuthUtil authUtil;
     private final UserRepository userRepo;
 
-
-
     @PostMapping("/login")
-    public ResponseEntity<LogInResponseDto> login(@RequestBody LogInRequestDto loginRequestDto, HttpServletResponse response) {
+    public ResponseEntity<LogInResponseDto> login(@RequestBody LogInRequestDto loginRequestDto,
+            HttpServletResponse response) {
         return ResponseEntity.ok(authService.login(loginRequestDto, response));
     }
 
@@ -39,7 +38,6 @@ public class AuthController {
     public ResponseEntity<SignUpResponseDto> signup(@RequestBody SignUpRequestDto signupRequestDto) {
         return ResponseEntity.ok(authService.signup(signupRequestDto));
     }
-
 
     @PostMapping("/send-otp")
     public ResponseEntity<String> sendOtp(@RequestBody Map<String, String> request) {
@@ -49,7 +47,6 @@ public class AuthController {
         System.out.println("after controller");
         return ResponseEntity.ok("OTP sent successfully");
     }
-
 
     @PostMapping("/verify-otp")
     public ResponseEntity<Map<String, String>> verifyOtp(@RequestBody Map<String, String> request) {
@@ -62,7 +59,6 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-
     @PostMapping("/send-password-link")
     public ResponseEntity<Map<String, String>> sendPasswordLink(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -71,10 +67,12 @@ public class AuthController {
         return ResponseEntity.ok(response);
 
     }
-//Forget password & needs password
+
+    // Forget password & needs password
     @PostMapping("/update-password")
-    public ResponseEntity<Map<String, String>>updatePassword(@RequestBody PasswordResetRequestDto request) {
-        passwordResetService.updatePasswordWithToken(request.getToken(), request.getPassword(), request.getConfirmPassword());
+    public ResponseEntity<Map<String, String>> updatePassword(@RequestBody PasswordResetRequestDto request) {
+        passwordResetService.updatePasswordWithToken(request.getToken(), request.getPassword(),
+                request.getConfirmPassword());
         Map<String, String> response = Map.of("message", "Password updated successfully");
         return ResponseEntity.ok(response);
     }
@@ -87,14 +85,13 @@ public class AuthController {
 
     @GetMapping("/refresh")
     public ResponseEntity<?> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken,
-                                          HttpServletResponse response) throws Exception {
+            HttpServletResponse response) throws Exception {
         if (refreshToken == null || !authUtil.validateToken(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid Refresh Token"));
         }
         try {
             String email = authUtil.getEmailFromToken(refreshToken);
-            User user = userRepo.findByEmail(email).orElseThrow(() ->
-                    new RuntimeException("User not found"));
+            User user = userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
             String accessToken = authUtil.generateAccessToken(user);
             refreshToken = authUtil.generateRefreshToken(user);
@@ -102,11 +99,15 @@ public class AuthController {
             ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                     .httpOnly(false)
                     .path("/")
+                    .secure(true)
+                    .sameSite("None")
                     .maxAge(Duration.ofMinutes(10))
                     .build();
             ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(false)
                     .path("/")
+                    .secure(true)
+                    .sameSite("None")
                     .maxAge(Duration.ofMinutes(20))
                     .build();
 
@@ -120,8 +121,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Failed to refresh token"));
         }
 
-
     }
-
 
 }
