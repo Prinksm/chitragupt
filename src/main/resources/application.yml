@@ -30,18 +30,18 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migrations
-  mail:
-    host: smtp.gmail.com
-    port: 465
-    username: notification.chitragupt@gmail.com
-    password: ${EMAIL_PASS}
-    protocol: smtp
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.ssl.enable: true
-      mail.smtp.starttls.enable: false
-      mail.smtp.starttls.required: false
-      mail.smtp.ssl.trust: smtp.gmail.com
+  # mail:
+  #   host: smtp.gmail.com
+  #   port: 465
+  #   username: notification.chitragupt@gmail.com
+  #   password: ${EMAIL_PASS}
+  #   protocol: smtp
+  #   properties:
+  #     mail.smtp.auth: true
+  #     mail.smtp.ssl.enable: true
+  #     mail.smtp.starttls.enable: false
+  #     mail.smtp.starttls.required: false
+  #     mail.smtp.ssl.trust: smtp.gmail.com
   logging:
     level:
       org.flywaydb: DEBUG
