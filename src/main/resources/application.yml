@@ -51,3 +51,7 @@ jwt:
   refreshTokenValidity: 1200
 frontendUrl: http://localhost:4200
 baseUrl: http://localhost:8089
+resend:
+  api:
+    key: ${RESEND_API_KEY}
+  from: "Chitragupt <onboarding@resend.dev>"
