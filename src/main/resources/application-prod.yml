@@ -8,5 +8,5 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: false
-frontendUrl: http://localhost:4200
+frontendUrl: https://chitragupt-frontend.vercel.app
 baseUrl: http://chitragupt-production.up.railway.app

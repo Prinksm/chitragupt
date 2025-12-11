@@ -49,8 +49,6 @@ jwt:
   secretKey: ${SECRET_KEY}
   accessTokenValidity: 300
   refreshTokenValidity: 1200
-frontendUrl: http://localhost:4200
-baseUrl: http://localhost:8089
 resend:
   api:
     key: ${RESEND_API_KEY}
