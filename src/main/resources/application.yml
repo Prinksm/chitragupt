@@ -53,3 +53,5 @@ resend:
   api:
     key: ${RESEND_API_KEY}
   from: "Chitragupt <onboarding@resend.dev>"
+frontendUrl: https://chitragupt-frontend.vercel.app
+baseUrl: http://chitragupt-production.up.railway.app
