@@ -64,7 +64,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                                 .build();
 
                 response.addHeader(HttpHeaders.SET_COOKIE, refreshcookie.toString());
-                response.sendRedirect(frontendUrl + "/user");
+                response.sendRedirect(frontendUrl + "/auth/google/callback");
                 // response.setStatus(loginResponse.getStatusCode().value());
                 // response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 // response.getWriter().write(objectMapper.writeValueAsString(loginResponse.getBody()));
