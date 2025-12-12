@@ -2,6 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.security.AuthService;
 import com.example.demo.security.AuthUtil;
+
+import io.jsonwebtoken.Claims;
+
 import com.example.demo.dto.*;
 import com.example.demo.entity.userEntity.User;
 import com.example.demo.repository.AuthCommon.UserRepository;
@@ -97,14 +100,14 @@ public class AuthController {
             refreshToken = authUtil.generateRefreshToken(user);
 
             ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
-                    .httpOnly(false)
+                    .httpOnly(true)
                     .path("/")
                     .secure(true)
                     .sameSite("None")
                     .maxAge(Duration.ofMinutes(10))
                     .build();
             ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-                    .httpOnly(false)
+                    .httpOnly(true)
                     .path("/")
                     .secure(true)
                     .sameSite("None")
@@ -121,6 +124,55 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Failed to refresh token"));
         }
 
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+
+        ResponseCookie clearAccess = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        ResponseCookie clearRefresh = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, clearAccess.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, clearRefresh.toString());
+
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<?> status(
+            @CookieValue(name = "accessToken", required = false) String accessToken) {
+
+        if (accessToken == null) {
+            return ResponseEntity.status(401).body(Map.of("authenticated", false));
+        }
+
+        // Validate token
+        if (!authUtil.validateToken(accessToken) || authUtil.isTokenExpired(accessToken)) {
+            return ResponseEntity.status(401).body(Map.of("authenticated", false));
+        }
+
+        // Extract user claims
+        Claims claims = authUtil.extractClaims(accessToken);
+
+        return ResponseEntity.ok(Map.of(
+                "authenticated", true,
+                "userId", claims.get("userId"),
+                "userName", claims.get("userName"),
+                "role", claims.get("role"),
+                "email", claims.getSubject()));
     }
 
 }

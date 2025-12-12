@@ -61,7 +61,7 @@ public class AuthService {
         User user1 = (User) authentication.getPrincipal();
 
         String token = authUtil.generateAccessToken(user1);
-        ResponseCookie cookie = ResponseCookie.from("accessToken", token).httpOnly(false)
+        ResponseCookie cookie = ResponseCookie.from("accessToken", token).httpOnly(true)
                 .path("/")
                 .secure(true)
                 .sameSite("None")
@@ -70,7 +70,7 @@ public class AuthService {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         String refreshToken = authUtil.generateRefreshToken(user1);
-        ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", refreshToken).httpOnly(false)
+        ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", refreshToken).httpOnly(true)
                 .path("/")
                 .secure(true)
                 .sameSite("None")

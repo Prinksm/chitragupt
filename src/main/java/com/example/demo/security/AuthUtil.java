@@ -27,6 +27,7 @@ public class AuthUtil {
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
     }
+
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
@@ -40,12 +41,30 @@ public class AuthUtil {
         }
     }
 
+    // Getting claims for the roles
+    public Claims extractClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getSecretKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            Claims claims = extractClaims(token);
+            return claims.getExpiration().before(new Date());
+        } catch (Exception e) {
+            return true; // treat invalid tokens as expired
+        }
+    }
+
     public String generateAccessToken(User user) {
         return Jwts.builder()
                 .subject(user.getEmail())
                 .claim("userId", user.getId().toString())
-                .claim("role",user.getRoles().toString())
-                .claim("userName",user.getFirstName().toString())
+                .claim("role", user.getRoles().toString())
+                .claim("userName", user.getFirstName().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * accessTokenValidity))
                 .signWith(getSecretKey())
@@ -63,7 +82,7 @@ public class AuthUtil {
     }
 
     public String getEmailFromToken(String token) {
-        Claims claims =  Jwts.parser()
+        Claims claims = Jwts.parser()
                 .verifyWith(getSecretKey())
                 .build()
                 .parseSignedClaims(token)
@@ -71,8 +90,8 @@ public class AuthUtil {
         return claims.getSubject();
     }
 
-    public AuthProviderType getProviderTypeFromRegistrationID (String registrationId){
-        return switch (registrationId.toLowerCase()){
+    public AuthProviderType getProviderTypeFromRegistrationID(String registrationId) {
+        return switch (registrationId.toLowerCase()) {
             case "google" -> AuthProviderType.GOOGLE;
             case "github" -> AuthProviderType.GITHUB;
             case "facebook" -> AuthProviderType.FACEBOOK;
@@ -98,7 +117,6 @@ public class AuthUtil {
         }
         return providerId;
     }
-
 
     public String determineUsernameFromOAuth2User(OAuth2User oAuth2User, String registrationId, String providerId) {
         String email = oAuth2User.getAttribute("email");
