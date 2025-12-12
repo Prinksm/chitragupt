@@ -47,7 +47,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 // authService.handleOauth2LoginRequest(oAuth2User , email , registrationId,
                 // response);
                 String accessToken = loginResponse.getBody().getJwt();
-                ResponseCookie cookie = ResponseCookie.from("accessToken", accessToken).httpOnly(false)
+                ResponseCookie cookie = ResponseCookie.from("accessToken", accessToken).httpOnly(true)
                                 .path("/")
                                 .maxAge(Duration.ofSeconds(accessTokenValidity))
                                 .secure(true)
@@ -56,7 +56,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
                 String refreshToken = loginResponse.getBody().getRefreshToken();
-                ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", refreshToken).httpOnly(false)
+                ResponseCookie refreshcookie = ResponseCookie.from("refreshToken", refreshToken).httpOnly(true)
                                 .path("/")
                                 .maxAge(Duration.ofSeconds(refreshTokenValidity))
                                 .secure(true)
