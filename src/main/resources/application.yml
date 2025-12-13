@@ -30,6 +30,8 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migrations
+    schemas: users,codeable_concept,patient,medication,diagnosis
+    default-schema: users
   # mail:
   #   host: smtp.gmail.com
   #   port: 465
