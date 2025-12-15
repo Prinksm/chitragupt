@@ -4,9 +4,14 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class ResendEmailClient {
@@ -18,43 +23,36 @@ public class ResendEmailClient {
     private String from;
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void send(String to, String subject, String html) {
         try {
-            String payload = """
-                    {
-                      "from": "%s",
-                      "to": ["%s"],
-                      "subject": "%s",
-                      "html": "%s"
-                    }
-                    """.stripIndent().formatted(
-                    escape(from),
-                    escape(to),
-                    escape(subject),
-                    escape(html));
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("from", from);
+            payload.put("to", Collections.singletonList(to));
+            payload.put("subject", subject);
+            payload.put("html", html);
+
+            String json = objectMapper.writeValueAsString(payload);
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.resend.com/emails"))
                     .header("Authorization", "Bearer " + apiKey)
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(payload))
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 300) {
-                throw new RuntimeException("Resend error: " + response.body());
+                throw new RuntimeException(
+                        "Resend API error. Status=" +
+                                response.statusCode() +
+                                ", body=" + response.body());
             }
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to send email via Resend", e);
         }
-    }
-
-    private String escape(String text) {
-        return text
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"");
     }
 }
