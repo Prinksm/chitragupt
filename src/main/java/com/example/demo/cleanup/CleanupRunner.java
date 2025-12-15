@@ -2,12 +2,12 @@ package com.example.demo.cleanup;
 
 import java.sql.SQLException;
 
-import org.flywaydb.core.internal.jdbc.JdbcTemplate;
-import org.springframework.stereotype.Service;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class CleanupRunner {
 
