@@ -7,7 +7,7 @@ BEGIN
 
     -- Delete unverified users older than 10 minutes
     DELETE FROM users.users
-    WHERE verified = false
+    WHERE is_verified = false
     AND created_at < now() - interval '10 minutes';
 
     -- Delete expired password reset tokens
