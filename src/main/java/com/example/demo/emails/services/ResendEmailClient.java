@@ -45,13 +45,13 @@ public class ResendEmailClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 300) {
-                throw new RuntimeException(
-                        "Resend API error. Status=" +
-                                response.statusCode() +
-                                ", body=" + response.body());
+                System.err.println("Resend response status: " + response.statusCode());
+                System.err.println("Resend response body: " + response.body());
+                throw new RuntimeException("Resend API error: " + response.body());
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Failed to send email via Resend", e);
         }
     }
