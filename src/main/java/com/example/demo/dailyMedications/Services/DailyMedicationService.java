@@ -25,6 +25,7 @@ public class DailyMedicationService {
     HealthDataService healthDataService;
     @Autowired
     PatientMedicationLogService logService;
+
     public List<MedicationWithStatus> getDailyMedications(Long patientId) {
         List<MedicationNormalized> normalized = getMedicationNormalized(patientId);
         List<MedicationWithStatus> medsWithStatus = initializeMedicationWithStatus(normalized);
@@ -48,18 +49,16 @@ public class DailyMedicationService {
             // Match logs
             for (MedicationWithStatus dose : doses) {
                 for (PatientMedicationLogs log : logs) {
-                    boolean match =
-                            log.getSuperPrescriptionId().equals(dose.getPrescriptionId()) &&
-                                    log.getPrescriptionId().equals(dose.getPrescriptionConditionId()) &&
-                                    log.getStatementId().equals(dose.getStatementId()) &&
-                                    log.getDoseTime() != null &&
-                                    log.getDoseTime().equals(dose.getDoseTime()); // ✅ use equals
+                    boolean match = log.getSuperPrescriptionId().equals(dose.getPrescriptionId()) &&
+                            log.getPrescriptionId().equals(dose.getPrescriptionConditionId()) &&
+                            log.getStatementId().equals(dose.getStatementId()) &&
+                            log.getDoseTime() != null &&
+                            log.getDoseTime().equals(dose.getDoseTime()); // ✅ use equals
 
                     if (match) {
                         dose.setTaken(log.getTaken());
-                        dose.setTakenStatus(log.getTaken() ?
-                                MedicationWithStatus.DoseStatus.TAKEN :
-                                MedicationWithStatus.DoseStatus.SKIPPED);
+                        dose.setTakenStatus(log.getTaken() ? MedicationWithStatus.DoseStatus.TAKEN
+                                : MedicationWithStatus.DoseStatus.SKIPPED);
                         dose.setLogCreatedAt(log.getDoseTime());
                     }
                 }
@@ -77,7 +76,8 @@ public class DailyMedicationService {
     public List<MedicationWithStatus> generateDosesForToday(MedicationWithStatus med) {
         List<MedicationWithStatus> doses = new ArrayList<>();
 
-        if (med.getTiming() == null || med.getTiming().getTimeOfDay() == null || med.getTiming().getFrequency() == null) {
+        if (med.getTiming() == null || med.getTiming().getTimeOfDay() == null
+                || med.getTiming().getFrequency() == null) {
             return doses;
         }
 
@@ -89,21 +89,28 @@ public class DailyMedicationService {
         LocalDateTime todayStart = today.atStartOfDay();
         LocalDateTime todayEnd = today.atTime(23, 59, 59, 999_000_000);
 
+        // Convert effective start and end dates
         LocalDateTime effectiveStart = med.getEffectiveStartDate().toInstant()
-                .atZone(ZoneId.systemDefault()).toLocalDateTime();
-        LocalDateTime effectiveEnd = med.getEffectiveEndDate().toInstant()
-                .atZone(ZoneId.systemDefault()).toLocalDateTime();
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        // Make effectiveEnd inclusive for the whole day
+        LocalDate effectiveEndDate = med.getEffectiveEndDate().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+        LocalDateTime effectiveEnd = effectiveEndDate.atTime(23, 59, 59, 999_000_000);
 
         // Convert period to Duration
         Duration periodDuration = switch (unit) {
+
             case "second" -> Duration.ofSeconds((long) period);
-            case "minute" -> Duration.ofMinutes((long) period);
-            case "hour"   -> Duration.ofHours((long) period);
-            case "day"    -> Duration.ofDays((long) period);
-            case "week"   -> Duration.ofDays((long) (period * 7));
-            case "month"  -> Duration.ofDays((long) (period * 30));
-            case "year"   -> Duration.ofDays((long) (period * 365));
-            default       -> Duration.ofDays((long) period);
+            case "minute" -> Duration.ofSeconds((long) (period * 60));
+            case "hour" -> Duration.ofSeconds((long) (period * 3600));
+            case "day" -> Duration.ofSeconds((long) (period * 86400));
+            case "week" -> Duration.ofSeconds((long) (period * 86400 * 7));
+            case "month" -> Duration.ofSeconds((long) (period * 86400 * 30));
+            case "year" -> Duration.ofSeconds((long) (period * 86400 * 365));
+            default -> Duration.ofDays((long) period);
         };
 
         // Start time for the first period
@@ -111,15 +118,17 @@ public class DailyMedicationService {
         LocalDateTime periodStart = today.atTime(startTime);
 
         // Adjust periodStart to effectiveStart if it is earlier
-        if (periodStart.isBefore(effectiveStart)) periodStart = effectiveStart;
+        if (periodStart.isBefore(effectiveStart))
+            periodStart = effectiveStart;
 
+        // Generate doses
         while (!periodStart.isAfter(todayEnd) && !periodStart.isAfter(effectiveEnd)) {
-            // Calculate interval between doses inside this period
-            Duration interval = (frequency > 1) ? periodDuration.dividedBy(frequency - 1) : Duration.ZERO;
+            Duration interval = (frequency > 1) ? periodDuration.dividedBy(frequency) : Duration.ZERO;
 
             for (int i = 0; i < frequency; i++) {
                 LocalDateTime doseTime = periodStart.plus(interval.multipliedBy(i));
-                if (doseTime.isAfter(todayEnd) || doseTime.isAfter(effectiveEnd)) break;
+                if (doseTime.isAfter(todayEnd) || doseTime.isAfter(effectiveEnd))
+                    break;
 
                 MedicationWithStatus dose = new MedicationWithStatus();
                 dose.copyFrom(med);
@@ -129,7 +138,6 @@ public class DailyMedicationService {
                 doses.add(dose);
             }
 
-            // Move to next period
             periodStart = periodStart.plus(periodDuration);
         }
 
@@ -139,8 +147,7 @@ public class DailyMedicationService {
 
     public List<MedicationNormalized> getMedicationNormalized(Long patientId) {
 
-        List<SuperPrescriptionResponseDto> prescriptions =
-                healthDataService.getSuperPrescriptionByPatient(patientId);
+        List<SuperPrescriptionResponseDto> prescriptions = healthDataService.getSuperPrescriptionByPatient(patientId);
 
         List<MedicationNormalized> meds = new ArrayList<>();
 
@@ -175,6 +182,7 @@ public class DailyMedicationService {
 
         return meds;
     }
+
     public List<MedicationWithStatus> initializeMedicationWithStatus(List<MedicationNormalized> meds) {
 
         List<MedicationWithStatus> result = new ArrayList<>();
@@ -213,6 +221,4 @@ public class DailyMedicationService {
         return result;
     }
 
-
 }
-
