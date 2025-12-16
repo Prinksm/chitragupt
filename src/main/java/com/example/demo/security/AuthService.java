@@ -167,10 +167,23 @@ public class AuthService {
             String refreshToken = authUtil.generateRefreshToken(user);
             return ResponseEntity.ok(new LogInResponseDto(token, refreshToken, user.getId()));
 
-        } else if (emailUser != null && emailUser.getPassword() != null && !emailUser.getPassword().isEmpty()) {
+        } else if (emailUser != null) {
+
+            // EMAIL user logging in via Google
+            if (!emailUser.isVerified()) {
+                emailUser.setVerified(true); // Google verifies email
+            }
+
+            emailUser.setProviderType(providerType); // GOOGLE
+            emailUser.setProviderId(providerId); // Google sub ID
+
+            userRepository.save(emailUser);
+
             String token = authUtil.generateAccessToken(emailUser);
             String refreshToken = authUtil.generateRefreshToken(emailUser);
-            return ResponseEntity.ok(new LogInResponseDto(token, refreshToken, emailUser.getId()));
+
+            return ResponseEntity.ok(
+                    new LogInResponseDto(token, refreshToken, emailUser.getId()));
         } else {
             throw new BadCredentialsException(
                     "This email is already registered with provider " + emailUser.getProviderType());
