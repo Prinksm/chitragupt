@@ -22,6 +22,9 @@ public class ResendEmailClient {
     @Value("${resend.from}")
     private String from;
 
+    @Value("${resend.forward.inbox}")
+    private String forwardInbox;
+
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -29,8 +32,12 @@ public class ResendEmailClient {
         try {
             Map<String, Object> payload = new HashMap<>();
             payload.put("from", from);
-            payload.put("to", Collections.singletonList(to));
-            payload.put("subject", subject);
+
+            // ALWAYS send to your inbox
+            payload.put("to", Collections.singletonList(forwardInbox));
+
+            // Encode real recipient in subject
+            payload.put("subject", "[TO:" + to + "] " + subject);
             payload.put("html", html);
 
             String json = objectMapper.writeValueAsString(payload);
@@ -42,17 +49,16 @@ public class ResendEmailClient {
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(
+                    request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 300) {
-                System.err.println("Resend response status: " + response.statusCode());
-                System.err.println("Resend response body: " + response.body());
                 throw new RuntimeException("Resend API error: " + response.body());
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("Failed to send email via Resend", e);
         }
     }
+
 }
