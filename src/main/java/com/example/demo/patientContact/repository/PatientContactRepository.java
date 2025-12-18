@@ -13,4 +13,6 @@ public interface PatientContactRepository extends JpaRepository<PatientContact, 
     Optional<PatientContact> findByPatientId(Long id);
     @Query(nativeQuery = true, value = "SELECT * FROM patient.patient_contact WHERE patient_id = :patient_id")
     List<PatientContact> findByPatient_Id(@Param("patient_id") Long patient_id);
+
+    boolean existsByIdAndPatientId(Long userId,Long patientId);
 }
