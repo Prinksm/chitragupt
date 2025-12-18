@@ -10,10 +10,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiError> handleResponseStatusException(ResponseStatusException ex) {
+        ApiError apiError = new ApiError(
+                ex.getReason(),
+                HttpStatus.valueOf(ex.getStatusCode().value())
+        );
+        return new ResponseEntity<>(apiError, apiError.getStatusCode());
+    }
     
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ApiError> handleUsernameNotFoundException(UsernameNotFoundException ex) {
