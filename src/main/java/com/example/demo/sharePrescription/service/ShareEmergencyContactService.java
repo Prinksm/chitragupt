@@ -1,6 +1,7 @@
 package com.example.demo.sharePrescription.service;
 
 
+import com.example.demo.ShareToken.ShareTokenService;
 import com.example.demo.addMedication.services.HealthDataService;
 import com.example.demo.entity.patientEntity.ContactTelecom;
 import com.example.demo.entity.patientEntity.PatientContact;
@@ -16,6 +17,7 @@ import java.util.List;
 public class ShareEmergencyContactService {
     private final ContactTelecomRepository contactTelecomRepo;
     private final HealthDataService healthDataService;
+    private final ShareTokenService shareTokenService;
 
     public List<ShareContactPatientDto> getPatientsForShareEmergencyContact(String email) {
 
@@ -26,8 +28,11 @@ public class ShareEmergencyContactService {
                 .map(PatientContact::getPatient)
                 .distinct()
                 .map(patient -> {
+
                     ShareContactPatientDto dto = new ShareContactPatientDto();
-                    dto.setPatientId(patient.getId());
+                    dto.setShareToken(
+                            shareTokenService.createToken(patient.getId(), email)
+                    );
                     dto.setFirstName(patient.getFirstName());
                     dto.setMiddleName(patient.getMiddleName());
                     dto.setLastName(patient.getLastName());

@@ -1,5 +1,6 @@
 package com.example.demo.sharePrescription;
 
+import com.example.demo.ShareToken.ShareTokenService;
 import com.example.demo.addMedication.dto.SuperPrescriptionResponseDto;
 import com.example.demo.addMedication.services.HealthDataService;
 import com.example.demo.entity.patientEntity.Patient;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/patient/sharedContact")
@@ -24,6 +26,7 @@ public class ShareEmergencyContactController {
     private final HealthDataService healthDataService;
     private final PatientContactRepository patientContactRepository;
     private final ContactTelecomRepository contactTelecomRepository;
+    private final ShareTokenService shareTokenService;
 
     @GetMapping
     public ResponseEntity<?> getEmergencyPatients(@AuthenticationPrincipal User user) {
@@ -32,23 +35,37 @@ public class ShareEmergencyContactController {
 
 
 
-    @GetMapping("/view/{patientId}")
-    public ResponseEntity<List<SuperPrescriptionResponseDto>> getPrescriptionsByPatient(@PathVariable Long patientId,@AuthenticationPrincipal User user) {
+    @GetMapping("/view/{token}")
+    public ResponseEntity<?> viewSharedPrescription(
+            @PathVariable String token,
+            @AuthenticationPrincipal User user) {
 
-       boolean allowed =
-            contactTelecomRepository.existsEmergencyContactForPatient(
-                    user.getEmail(),
-                    patientId
-            );
+        ShareTokenService.TokenEntry entry =
+                shareTokenService.validate(token, user.getEmail());
 
-    if (!allowed) {
-        throw new ResponseStatusException(
-                HttpStatus.FORBIDDEN,
-                "You are not an emergency contact for this patient"
+        if (entry == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // extra safety (still enforce relationship)
+        boolean allowed =
+                contactTelecomRepository.existsEmergencyContactForPatient(
+                        user.getEmail(),
+                        entry.patientId()
+                );
+
+        if (!allowed) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        String newToken = shareTokenService.rotate(token);
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "token", newToken,
+                        "prescriptions",
+                        healthDataService.getSuperPrescriptionByPatient(entry.patientId())
+                )
         );
-    }
-        List<SuperPrescriptionResponseDto> response = healthDataService.getSuperPrescriptionByPatient(patientId);
-
-        return ResponseEntity.ok(response);
     }
 }

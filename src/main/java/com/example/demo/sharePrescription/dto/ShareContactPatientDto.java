@@ -6,7 +6,9 @@ import lombok.Data;
 import java.util.List;
 @Data
 public class ShareContactPatientDto {
-    private Long patientId;
+    private String shareToken;
+
+//    private Long patientId;
     private String firstName;
     private String middleName;
     private String lastName;

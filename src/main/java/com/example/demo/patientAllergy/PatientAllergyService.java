@@ -129,6 +129,7 @@ public class PatientAllergyService {
         PatientAllergyResponseDto r = new PatientAllergyResponseDto();
 
         r.setId(entity.getId());
+        r.setSlug(AllergySlugUtil.toSlug(entity.getId()));
         r.setPatientId(entity.getPatient().getId());
         r.setConceptId(entity.getAllergyCode());
         r.setAllergyName(allergyName);

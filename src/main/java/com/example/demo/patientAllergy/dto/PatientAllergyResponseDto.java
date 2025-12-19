@@ -22,4 +22,5 @@ public class PatientAllergyResponseDto {
     private String criticality;
     private LocalDate onsetDate;
     private LocalDateTime recordedDate;
+    private String slug;
 }

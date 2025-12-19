@@ -15,9 +15,9 @@ spring:
       env: DATABASE_CONFIG
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${SPRING_PROD_DATASOURCE_URL}
-    username: ${SPRING_PROD_DATASOURCE_USERNAME}
-    password: ${SPRING_PROD_DATASOURCE_PASSWORD}
+  #    url: ${SPRING_PROD_DATASOURCE_URL}
+  #    username: ${SPRING_PROD_DATASOURCE_USERNAME}
+  #    password: ${SPRING_PROD_DATASOURCE_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: none
@@ -60,5 +60,5 @@ resend:
     inbox: notification.chitragupt@gmail.com
 frontendUrl: https://chitragupt-frontend.vercel.app
 baseUrl: http://chitragupt-production.up.railway.app
-# frontendUrl : http://localhost:4200
+# frontendUrl: http://localhost:4200
 # baseUrl: http://localhost:8089
