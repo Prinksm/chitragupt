@@ -15,9 +15,9 @@ spring:
       env: DATABASE_CONFIG
   datasource:
     driver-class-name: org.postgresql.Driver
-  #    url: ${SPRING_PROD_DATASOURCE_URL}
-  #    username: ${SPRING_PROD_DATASOURCE_USERNAME}
-  #    password: ${SPRING_PROD_DATASOURCE_PASSWORD}
+    url: ${SPRING_PROD_DATASOURCE_URL}
+    username: ${SPRING_PROD_DATASOURCE_USERNAME}
+    password: ${SPRING_PROD_DATASOURCE_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: none
